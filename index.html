@@ -310,9 +310,11 @@
     <!-- SOL/ORTA ANA ÇALIŞMA ALANI -->
     <div class="flex-1 flex flex-col bg-slate-900 rounded-2xl border-2 border-slate-800/80 overflow-hidden shadow-2xl relative min-h-[300px]">
       
-      <!-- 1. GÖRÜNÜM: JITSI CANLI VİDEO ODASI -->
-      <div id="videoView" class="w-full h-full flex-1 bg-black relative flex items-center justify-center">
-        <div id="jitsiContainer" class="w-full h-full">
+      <!-- 1. GÖRÜNÜM: JITSI CANLI VİDEO ODASI & ANA EĞİTİM SAHNESİ -->
+      <div id="videoView" class="w-full h-full flex-1 bg-black relative flex items-center justify-center overflow-hidden">
+        
+        <!-- Jitsi Entegrasyon Konteyneri -->
+        <div id="jitsiContainer" class="w-full h-full absolute inset-0 z-0">
           <div id="loadingOverlay" class="absolute inset-0 bg-slate-950 z-10 flex flex-col items-center justify-center gap-3">
             <div class="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
             <p class="text-slate-300 font-bold text-sm sm:text-base">Canlı Eğitim Odasına Bağlanılıyor...</p>
@@ -320,19 +322,44 @@
           </div>
         </div>
 
-        <!-- BİLGİ VE YEREL KAMERA YANSITMA KUTUSU (KULLANICININ KENDİ GÖRÜNTÜSÜ VE SESİ ANINDA YANSIR) -->
-        <div id="localCameraStageOverlay" class="hidden absolute top-3 left-3 sm:top-4 sm:left-4 z-20 bg-slate-900/90 border-2 border-emerald-500/80 rounded-2xl p-2 shadow-2xl backdrop-blur flex items-center gap-2.5">
-          <video id="stageLocalVideo" autoplay playsinline muted class="w-24 h-18 sm:w-32 sm:h-24 rounded-xl object-cover bg-black border border-emerald-400/50 shadow"></video>
-          <div class="text-left text-xs pr-1.5">
-            <div class="font-black text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Canlı Kameranız</span>
+        <!-- ANA SAHNE CANLI KAMERA GÖRÜNTÜSÜ (TAM EKRAN HD YANSITMA) -->
+        <div id="mainCameraStage" class="relative z-10 w-full h-full flex flex-col items-center justify-center p-2 sm:p-4 bg-slate-950 pointer-events-none">
+          
+          <!-- Canlı Video Elementi (Kamera Açıldığında Tüm Sahneyi Kaplar) -->
+          <video id="mainStageVideo" autoplay playsinline muted class="hidden w-full h-full max-h-[82dvh] object-contain rounded-2xl shadow-2xl border-2 border-emerald-500/50 bg-black pointer-events-auto"></video>
+
+          <!-- Kamera Kapalıyken Sahne Ortasında Görünen Standby Kartı -->
+          <div id="mainStagePlaceholder" class="flex flex-col items-center justify-center text-center p-4 sm:p-6 max-w-sm pointer-events-auto">
+            <div class="relative w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center text-4xl sm:text-5xl text-indigo-400 mb-3 shadow-2xl">
+              <i class="fa-solid fa-chalkboard-user"></i>
+              <span id="stageStandbyPulse" class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-slate-950 animate-ping"></span>
             </div>
-            <div class="text-[10px] text-emerald-300 font-semibold mt-0.5" id="stageLocalAudioStatus">Mikrofon Açık</div>
-            <button onclick="openMediaDeviceSettingsModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold underline mt-1 block">
-              <i class="fa-solid fa-sliders mr-0.5"></i> Cihaz Değiştir
-            </button>
+            <h3 class="text-base sm:text-lg font-black text-white mb-1" id="stageSpeakerName">Eğitim Sahnesi</h3>
+            <p class="text-xs text-slate-400 mb-3" id="stageSpeakerStatus">Görüntünüzü ekrana yansıtmak için alttaki "Kamera" butonuna basınız.</p>
+            
+            <!-- Konuşunca Zıplayan 5'li Canlı Ses Dalgası (Equalizer) -->
+            <div id="stageVoiceVisualizer" class="hidden flex items-center justify-center gap-1 bg-slate-900 border border-emerald-500/60 px-3.5 py-1.5 rounded-xl shadow-lg">
+              <span class="w-1.5 h-3.5 bg-emerald-400 rounded-full animate-bounce"></span>
+              <span class="w-1.5 h-6 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.15s]"></span>
+              <span class="w-1.5 h-8 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.3s]"></span>
+              <span class="w-1.5 h-5 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+              <span class="w-1.5 h-3 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.05s]"></span>
+              <span class="text-xs font-bold text-emerald-300 ml-2">Konuşuyorsunuz 🎙️</span>
+            </div>
           </div>
+
+          <!-- Üst Köşe Canlı Yayın Rozetleri -->
+          <div id="stageLiveBadgeBar" class="hidden absolute top-3 left-3 sm:top-4 sm:left-4 flex items-center gap-2 pointer-events-auto">
+            <span class="bg-red-600 text-white font-black text-[10px] sm:text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-lg animate-pulse">
+              <span class="w-2 h-2 rounded-full bg-white"></span>
+              <span>CANLI YAYIN</span>
+            </span>
+            <span id="stageMicActiveBadge" class="bg-emerald-950 border border-emerald-500 text-emerald-300 font-bold text-[10px] sm:text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
+              <i class="fa-solid fa-microphone text-[10px]"></i>
+              <span>Ses Açık</span>
+            </span>
+          </div>
+
         </div>
       </div>
 
@@ -767,74 +794,77 @@
       <!-- Dinamik olarak soru şık butonları JS tarafından buraya basılır -->
     </div>
 
-    <!-- ALT KONTROL BUTONLARI (TEST BAŞLAYINCA SAĞA KAYAR VE BİRAZ KÜÇÜLÜR) -->
-    <div id="participantControls" class="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 w-full max-w-4xl transition-all duration-300">
+    <!-- ALT KONTROL BUTONLARI (MOBİLDE TAM 5 EŞİT SÜTUN, ASLA TAŞMAZ VE KAYMAZ) -->
+    <div id="participantControls" class="grid grid-cols-5 sm:flex sm:items-center sm:justify-center gap-1 sm:gap-2 md:gap-3 w-full max-w-4xl transition-all duration-300">
       
       <!-- 1. Buton: Sesimi Aç / Kapat (İzin Korumalı) -->
-      <button id="micBtn" onclick="toggleMicWithPermission()" class="footer-ctrl-btn flex-1 min-w-0 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-white py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-xl sm:rounded-2xl shadow-lg transition">
+      <button id="micBtn" onclick="toggleMicWithPermission()" class="footer-ctrl-btn flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-white py-1.5 sm:py-2.5 px-0.5 sm:px-3 rounded-xl sm:rounded-2xl shadow-lg transition min-w-0">
         <div id="micIconBox" class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-slate-700 flex items-center justify-center text-rose-400 text-xs sm:text-lg shrink-0">
           <i id="micIcon" class="fa-solid fa-microphone-slash"></i>
         </div>
         <div class="text-center sm:text-left min-w-0">
           <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Mikrofon</div>
-          <div id="micStatusText" class="text-[9px] sm:text-sm font-black text-white truncate max-w-[55px] sm:max-w-none">KAPALI</div>
+          <div id="micStatusText" class="text-[9px] sm:text-sm font-black text-white truncate">KAPALI</div>
         </div>
       </button>
 
       <!-- 2. Buton: Kamera Aç / Kapat (İzin Korumalı) -->
-      <button id="camBtn" onclick="toggleCamWithPermission()" class="footer-ctrl-btn flex-1 min-w-0 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-white py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-xl sm:rounded-2xl shadow-lg transition">
+      <button id="camBtn" onclick="toggleCamWithPermission()" class="footer-ctrl-btn relative flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-white py-1.5 sm:py-2.5 px-0.5 sm:px-3 rounded-xl sm:rounded-2xl shadow-lg transition min-w-0">
         <div id="camIconBox" class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-slate-700 flex items-center justify-center text-rose-400 text-xs sm:text-lg shrink-0">
           <i id="camIcon" class="fa-solid fa-video-slash"></i>
         </div>
         <div class="text-center sm:text-left min-w-0">
           <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Kamera</div>
-          <div id="camStatusText" class="text-[9px] sm:text-sm font-black text-white truncate max-w-[55px] sm:max-w-none">KAPALI</div>
+          <div id="camStatusText" class="text-[9px] sm:text-sm font-black text-white truncate">KAPALI</div>
         </div>
-      </button>
-
-      <!-- 2.5 Buton: Kamera & Mikrofon Donanım Seçimi / Ayarları -->
-      <button onclick="openMediaDeviceSettingsModal()" class="footer-ctrl-btn flex-1 min-w-0 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-slate-300 py-1.5 sm:py-2.5 px-1 sm:px-2 rounded-xl sm:rounded-2xl shadow-lg transition" title="Kamera ve Mikrofon Cihazı Seç / Canlı Test Et">
-        <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-slate-700 flex items-center justify-center text-indigo-400 text-xs sm:text-base shrink-0">
-          <i class="fa-solid fa-sliders"></i>
-        </div>
-        <div class="text-center sm:text-left min-w-0">
-          <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Aygıt</div>
-          <div class="text-[9px] sm:text-sm font-black text-indigo-300 truncate max-w-[55px] sm:max-w-none">Cihazlar</div>
-        </div>
+        <span onclick="event.stopPropagation(); openMediaDeviceSettingsModal();" class="sm:hidden absolute -top-1 -right-1 w-4 h-4 bg-indigo-700 text-indigo-200 rounded-full flex items-center justify-center text-[8px] border border-indigo-400 shadow" title="Cihaz Seçimi">
+          <i class="fa-solid fa-gear"></i>
+        </span>
       </button>
 
       <!-- 3. Buton: Söz İste / El Kaldır -->
-      <button id="handBtn" onclick="toggleHandRaise()" class="footer-ctrl-btn flex-1 min-w-0 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-amber-500 hover:bg-amber-400 active:scale-95 border-2 border-amber-300 text-slate-950 py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-xl sm:rounded-2xl shadow-xl shadow-amber-500/20 transition font-black">
+      <button id="handBtn" onclick="toggleHandRaise()" class="footer-ctrl-btn flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-amber-500 hover:bg-amber-400 active:scale-95 border-2 border-amber-300 text-slate-950 py-1.5 sm:py-2.5 px-0.5 sm:px-3 rounded-xl sm:rounded-2xl shadow-xl shadow-amber-500/20 transition font-black min-w-0">
         <div id="handIconBox" class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-slate-950 flex items-center justify-center text-amber-400 text-xs sm:text-lg shrink-0">
           <i id="handIcon" class="fa-solid fa-hand"></i>
         </div>
         <div class="text-center sm:text-left min-w-0">
           <div class="text-[9px] sm:text-xs text-amber-950 font-bold leading-tight hidden sm:block">Soru Sor</div>
-          <div id="handStatusText" class="text-[9px] sm:text-sm font-black text-slate-950 truncate max-w-[55px] sm:max-w-none">Söz İste ✋</div>
+          <div id="handStatusText" class="text-[9px] sm:text-sm font-black text-slate-950 truncate">Söz İste</div>
         </div>
       </button>
 
       <!-- 4. Buton: Sohbet -->
-      <button id="chatFooterBtn" onclick="toggleChatPanel()" class="footer-ctrl-btn flex-1 min-w-0 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-white py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-xl sm:rounded-2xl shadow-lg transition relative">
+      <button id="chatFooterBtn" onclick="toggleChatPanel()" class="footer-ctrl-btn relative flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-white py-1.5 sm:py-2.5 px-0.5 sm:px-3 rounded-xl sm:rounded-2xl shadow-lg transition min-w-0">
         <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-slate-700 flex items-center justify-center text-amber-400 text-xs sm:text-lg shrink-0">
           <i class="fa-solid fa-comments"></i>
         </div>
         <div class="text-center sm:text-left min-w-0">
           <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Yazışma</div>
-          <div class="text-[9px] sm:text-sm font-black text-white truncate max-w-[55px] sm:max-w-none">Sohbet 💬</div>
+          <div class="text-[9px] sm:text-sm font-black text-white truncate">Sohbet</div>
         </div>
         <span id="chatBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] sm:text-[10px] min-w-[16px] sm:min-w-[18px] h-4 sm:h-4.5 px-1 rounded-full flex items-center justify-center font-black animate-bounce shadow">0</span>
       </button>
 
       <!-- 5. Buton: Ayrıl / Çıkış -->
-      <button onclick="leaveMeeting()" class="footer-ctrl-btn flex-1 min-w-0 sm:flex-initial flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 bg-red-600 hover:bg-red-500 active:scale-95 border-2 border-red-400 text-white py-1.5 sm:py-2.5 px-1.5 sm:px-3.5 rounded-xl sm:rounded-2xl shadow-lg transition" title="Toplantıdan Ayrıl">
+      <button onclick="leaveMeeting()" class="footer-ctrl-btn flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 bg-red-600 hover:bg-red-500 active:scale-95 border-2 border-red-400 text-white py-1.5 sm:py-2.5 px-0.5 sm:px-3.5 rounded-xl sm:rounded-2xl shadow-lg transition min-w-0" title="Toplantıdan Ayrıl">
         <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-red-700/80 flex items-center justify-center text-white text-xs sm:text-base shrink-0 sm:hidden">
           <i class="fa-solid fa-phone-slash"></i>
         </div>
         <i class="fa-solid fa-phone-slash text-xs sm:text-base hidden sm:inline-block shrink-0"></i>
         <div class="text-center sm:text-left min-w-0">
           <div class="text-[9px] sm:text-xs text-red-200 font-semibold leading-tight hidden sm:block">Görüşme</div>
-          <span class="text-[9px] sm:text-sm font-black truncate max-w-[55px] sm:max-w-none">Ayrıl</span>
+          <span class="text-[9px] sm:text-sm font-black truncate">Ayrıl</span>
+        </div>
+      </button>
+
+      <!-- 6. Buton: Cihaz Ayarları (SADECE BİLGİSAYAR VE TABLETTE GÖRÜNÜR) -->
+      <button onclick="openMediaDeviceSettingsModal()" class="footer-ctrl-btn hidden md:flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-slate-300 py-2 sm:py-2.5 px-2.5 rounded-xl sm:rounded-2xl shadow-lg transition shrink-0" title="Kamera ve Mikrofon Donanım Seçimi">
+        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-indigo-400 text-sm shrink-0">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <div class="text-left min-w-0">
+          <div class="text-xs text-slate-400 font-semibold leading-tight">Aygıt</div>
+          <div class="text-xs font-black text-indigo-300">Cihazlar</div>
         </div>
       </button>
 
@@ -1709,25 +1739,30 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
           stripVideo.play().catch(()=>{});
         }
 
-        // 2. Ana video sahnesindeki canlı kamera kutucuğunu yansıt
-        const stageOverlay = document.getElementById('localCameraStageOverlay');
-        const stageVideo = document.getElementById('stageLocalVideo');
-        if (stageOverlay && stageVideo) {
-          stageVideo.srcObject = localLiveCameraStream;
-          stageOverlay.classList.remove('hidden');
-          stageVideo.play().catch(()=>{});
+        // 2. Ana eğitim sahnesine kamerayı doğrudan ve tam ekran yansıt
+        const mainVid = document.getElementById('mainStageVideo');
+        const mainPlaceholder = document.getElementById('mainStagePlaceholder');
+        const liveBadge = document.getElementById('stageLiveBadgeBar');
+
+        if (mainVid) {
+          mainVid.srcObject = localLiveCameraStream;
+          mainVid.classList.remove('hidden');
+          if (mainPlaceholder) mainPlaceholder.classList.add('hidden');
+          if (liveBadge) liveBadge.classList.remove('hidden');
+          mainVid.play().catch(()=>{});
         }
 
-        // 3. Jitsi Meet'e ilet
+        // 3. Jitsi Meet motoruna komut ilet
         if (jitsiApi) {
           jitsiApi.executeCommand('toggleVideo');
         }
 
         isCamOn = true;
         updateCamUI(true);
+        showToast("Kameranız başarıyla açıldı ve ekrana yansıtıldı!");
       } catch (err) {
         console.warn("Kamera başlatma hatası:", err);
-        showToast("Kamera açılamadı. 'Cihazlar' butonundan web kameranızı seçebilirsiniz.");
+        showToast("Kamera açılamadı. 'Cihazlar' menüsünden bilgisayar kameranızı seçebilirsiniz.");
         openMediaDeviceSettingsModal();
       }
     }
@@ -1738,6 +1773,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         localLiveCameraStream = null;
       }
 
+      // 1. Şerit barındaki kamerayı gizle
       const stripVideo = document.getElementById('stripInstructorLiveVideo');
       const stripAvatar = document.getElementById('stripInstructorAvatarIcon');
       const stripDot = document.getElementById('stripInstructorLiveDot');
@@ -1754,8 +1790,17 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         }
       }
 
-      const stageOverlay = document.getElementById('localCameraStageOverlay');
-      if (stageOverlay) stageOverlay.classList.add('hidden');
+      // 2. Ana sahne videosunu gizle ve standby kartını göster
+      const mainVid = document.getElementById('mainStageVideo');
+      const mainPlaceholder = document.getElementById('mainStagePlaceholder');
+      const liveBadge = document.getElementById('stageLiveBadgeBar');
+
+      if (mainVid) {
+        mainVid.classList.add('hidden');
+        mainVid.srcObject = null;
+        if (mainPlaceholder) mainPlaceholder.classList.remove('hidden');
+        if (liveBadge) liveBadge.classList.add('hidden');
+      }
 
       if (jitsiApi && isCamOn) {
         jitsiApi.executeCommand('toggleVideo');
@@ -1785,6 +1830,9 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
 
         isMicOn = true;
         updateMicUI(true);
+
+        const stageMicBadge = document.getElementById('stageMicActiveBadge');
+        if (stageMicBadge) stageMicBadge.classList.remove('hidden');
       } catch (err) {
         console.warn("Mikrofon başlatma hatası:", err);
         showToast("Mikrofon açılamadı. 'Cihazlar' butonundan mikrofonunuzu seçebilirsiniz.");
@@ -1809,6 +1857,13 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
 
       isMicOn = false;
       updateMicUI(false);
+
+      const stageMicBadge = document.getElementById('stageMicActiveBadge');
+      if (stageMicBadge) stageMicBadge.classList.add('hidden');
+      const stageVisualizer = document.getElementById('stageVoiceVisualizer');
+      if (stageVisualizer) stageVisualizer.classList.add('hidden');
+      const pulseDot = document.getElementById('speakerPulseDot');
+      if (pulseDot) pulseDot.classList.add('hidden');
     }
 
     function startAudioLevelMonitoring(stream) {
@@ -1837,30 +1892,35 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
           let avg = sum / dataArr.length;
           let levelPercent = Math.min(100, Math.round((avg / 128) * 100));
 
-          // Ayarlar modalındaki göstergeyi güncelle
+          // 1. Ayarlar modalındaki çubuğu oynat
           const modalBar = document.getElementById('modalAudioMeterBar');
           const modalStatus = document.getElementById('modalAudioMeterStatus');
-          if (modalBar) {
-            modalBar.style.width = levelPercent + '%';
-          }
+          if (modalBar) modalBar.style.width = levelPercent + '%';
           if (modalStatus) {
-            modalStatus.innerText = levelPercent > 10 ? `Ses algılanıyor (${levelPercent}%) 🎙️` : "Konuşarak test ediniz...";
+            modalStatus.innerText = levelPercent > 8 ? `Ses algılanıyor (${levelPercent}%) 🎙️` : "Konuşarak test ediniz...";
           }
 
-          // Sahne kutusundaki mikrofon göstergesi
-          const stageStatus = document.getElementById('stageLocalAudioStatus');
-          if (stageStatus && isMicOn) {
-            stageStatus.innerText = levelPercent > 10 ? "Konuşuyorsunuz 🎙️" : "Mikrofon Açık";
-          }
+          // 2. Sahnedeki ses görselleştiricisini oynat (Canlı Ses Dalgası)
+          const stageVisualizer = document.getElementById('stageVoiceVisualizer');
+          const stageStandbyPulse = document.getElementById('stageStandbyPulse');
+          const activeSpeakerCard = document.getElementById('activeSpeakerCard');
+          const activeSpeakerName = document.getElementById('activeSpeakerName');
+          const activeSpeakerBadge = document.getElementById('activeSpeakerBadge');
+          const speakerPulseDot = document.getElementById('speakerPulseDot');
 
-          // Alt bardaki ve şerit bardaki konuşma göstergeleri
-          const pulseDot = document.getElementById('speakerPulseDot');
-          if (pulseDot) {
-            if (levelPercent > 12) {
-              pulseDot.classList.remove('hidden');
-            } else {
-              pulseDot.classList.add('hidden');
-            }
+          if (levelPercent > 8) {
+            if (stageVisualizer) stageVisualizer.classList.remove('hidden');
+            if (stageStandbyPulse) stageStandbyPulse.classList.remove('hidden');
+            if (speakerPulseDot) speakerPulseDot.classList.remove('hidden');
+            if (activeSpeakerBadge) activeSpeakerBadge.classList.remove('hidden');
+            if (activeSpeakerName) activeSpeakerName.innerText = currentUserName + " (Siz)";
+            if (activeSpeakerCard) activeSpeakerCard.classList.add('ring-2', 'ring-emerald-400', 'bg-emerald-950/40');
+          } else {
+            if (stageVisualizer) stageVisualizer.classList.add('hidden');
+            if (stageStandbyPulse) stageStandbyPulse.classList.add('hidden');
+            if (speakerPulseDot) speakerPulseDot.classList.add('hidden');
+            if (activeSpeakerBadge) activeSpeakerBadge.classList.add('hidden');
+            if (activeSpeakerCard) activeSpeakerCard.classList.remove('ring-2', 'ring-emerald-400', 'bg-emerald-950/40');
           }
 
           webAudioAnimId = requestAnimationFrame(renderAudioLevel);
