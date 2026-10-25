@@ -179,7 +179,7 @@
         </div>
         <div>
           <label class="text-xs text-slate-300 font-bold block mb-1">Ders Giriş Şifresi:</label>
-          <input type="text" id="userClassCodeInput" placeholder="AFET-XXXX" class="w-full bg-slate-950 border-2 border-slate-700 text-amber-300 px-4 py-3 rounded-xl text-sm font-black font-mono tracking-wider uppercase focus:outline-none focus:border-amber-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsParticipant()">
+          <input type="text" id="userClassCodeInput" placeholder="Ders şifrenizi giriniz..." class="w-full bg-slate-950 border-2 border-slate-700 text-amber-300 px-4 py-3 rounded-xl text-sm font-black font-mono tracking-wider uppercase focus:outline-none focus:border-amber-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsParticipant()">
           <p class="text-[11px] text-slate-400 mt-1">Eğitmeninizin paylaştığı ders şifresini yazınız.</p>
         </div>
         <button onclick="proceedToMeetingAsParticipant()" class="w-full bg-red-600 hover:bg-red-500 active:scale-95 text-white font-black py-3.5 px-6 rounded-xl text-sm shadow-xl shadow-red-950 transition flex items-center justify-center gap-2 mt-2">
@@ -255,19 +255,20 @@
   <!-- AKTİF KAMERALAR VE KONUŞMACI ŞERİDİ (EĞİTMEN SABİT + KONUŞAN ÖNE GELİR) -->
   <div id="cameraStripBar" class="bg-slate-900/90 border-b border-slate-800 px-2 sm:px-3 py-1.5 flex items-center justify-between shrink-0 z-20 gap-2 overflow-x-auto no-scrollbar">
     <div class="flex items-center gap-2 overflow-x-auto py-0.5 no-scrollbar" id="cameraStripList">
-      <!-- 1. Eğitmen Masası Kamerası / Kartı (HER ZAMAN GÖSTERİLİR) -->
+      <!-- 1. Eğitmen Masası Kamerası / Kartı (HER ZAMAN GÖSTERİLİR - CANLI VİDEO YANSITMA DESTEKLİ) -->
       <div id="instructorCameraCard" class="relative bg-slate-950 border-2 border-indigo-500 rounded-xl px-2 sm:px-2.5 py-1.5 flex items-center gap-2 shadow-md shrink-0">
-        <div class="relative w-8 h-8 rounded-lg bg-indigo-950 border border-indigo-400 flex items-center justify-center text-indigo-300 font-black text-xs shrink-0">
-          <i class="fa-solid fa-chalkboard-user"></i>
-          <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-950 animate-pulse"></span>
+        <div class="relative w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-indigo-950 border border-indigo-400 flex items-center justify-center text-indigo-300 font-black text-xs shrink-0 overflow-hidden">
+          <i id="stripInstructorAvatarIcon" class="fa-solid fa-chalkboard-user text-sm sm:text-base"></i>
+          <video id="stripInstructorLiveVideo" autoplay playsinline muted class="hidden absolute inset-0 w-full h-full object-cover"></video>
+          <span id="stripInstructorLiveDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-950 animate-pulse"></span>
         </div>
         <div class="text-left">
           <div class="text-[11px] font-black text-white flex items-center gap-1">
             <span id="stripInstructorName" class="truncate max-w-[110px] sm:max-w-none">Eğitmen / Moderatör</span>
             <span class="bg-indigo-600 text-white text-[9px] px-1 py-0.2 rounded font-bold shrink-0">Moderatör</span>
           </div>
-          <div class="text-[9px] text-emerald-400 font-semibold flex items-center gap-1">
-            <i class="fa-solid fa-video text-[8px]"></i> Kamera Açık
+          <div id="stripInstructorCamStatus" class="text-[9px] text-slate-400 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-video-slash text-[8px]"></i> Kamera Kapalı
           </div>
         </div>
       </div>
@@ -316,6 +317,21 @@
             <div class="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
             <p class="text-slate-300 font-bold text-sm sm:text-base">Canlı Eğitim Odasına Bağlanılıyor...</p>
             <p class="text-slate-500 text-xs">Kamera ve mikrofon izni istenirse "İzin Ver"e basınız.</p>
+          </div>
+        </div>
+
+        <!-- BİLGİ VE YEREL KAMERA YANSITMA KUTUSU (KULLANICININ KENDİ GÖRÜNTÜSÜ VE SESİ ANINDA YANSIR) -->
+        <div id="localCameraStageOverlay" class="hidden absolute top-3 left-3 sm:top-4 sm:left-4 z-20 bg-slate-900/90 border-2 border-emerald-500/80 rounded-2xl p-2 shadow-2xl backdrop-blur flex items-center gap-2.5">
+          <video id="stageLocalVideo" autoplay playsinline muted class="w-24 h-18 sm:w-32 sm:h-24 rounded-xl object-cover bg-black border border-emerald-400/50 shadow"></video>
+          <div class="text-left text-xs pr-1.5">
+            <div class="font-black text-white flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Canlı Kameranız</span>
+            </div>
+            <div class="text-[10px] text-emerald-300 font-semibold mt-0.5" id="stageLocalAudioStatus">Mikrofon Açık</div>
+            <button onclick="openMediaDeviceSettingsModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold underline mt-1 block">
+              <i class="fa-solid fa-sliders mr-0.5"></i> Cihaz Değiştir
+            </button>
           </div>
         </div>
       </div>
@@ -730,6 +746,15 @@
         </div>
       </div>
 
+      <!-- DERSİ BİTİR VE OTURUMU SIFIRLA (SADECE EĞİTMEN MASASINDA GÖRÜNÜR - İZİN KORUMALI) -->
+      <div class="pt-2 border-t border-slate-800 shrink-0">
+        <button onclick="requestEndLessonModal()" class="w-full bg-gradient-to-r from-red-700 via-rose-700 to-red-800 hover:from-red-600 hover:to-rose-600 active:scale-95 text-white font-black py-3 px-3 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-red-950 border border-red-500/60 transition">
+          <i class="fa-solid fa-power-off text-base text-red-200"></i>
+          <span>Dersi Bitir ve Oturumu Kapat</span>
+        </button>
+        <p class="text-[10px] text-slate-400 text-center mt-1">Ders bitirildiğinde tüm oturum sıfırlanır ve sistem yeniden başlar.</p>
+      </div>
+
     </div>
 
   </main>
@@ -764,6 +789,17 @@
         <div class="text-center sm:text-left min-w-0">
           <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Kamera</div>
           <div id="camStatusText" class="text-[9px] sm:text-sm font-black text-white truncate max-w-[55px] sm:max-w-none">KAPALI</div>
+        </div>
+      </button>
+
+      <!-- 2.5 Buton: Kamera & Mikrofon Donanım Seçimi / Ayarları -->
+      <button onclick="openMediaDeviceSettingsModal()" class="footer-ctrl-btn flex-1 min-w-0 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-slate-300 py-1.5 sm:py-2.5 px-1 sm:px-2 rounded-xl sm:rounded-2xl shadow-lg transition" title="Kamera ve Mikrofon Cihazı Seç / Canlı Test Et">
+        <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-slate-700 flex items-center justify-center text-indigo-400 text-xs sm:text-base shrink-0">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <div class="text-center sm:text-left min-w-0">
+          <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Aygıt</div>
+          <div class="text-[9px] sm:text-sm font-black text-indigo-300 truncate max-w-[55px] sm:max-w-none">Cihazlar</div>
         </div>
       </button>
 
@@ -812,7 +848,7 @@
         <i id="deviceModalIcon" class="fa-solid fa-video"></i>
       </div>
       <h3 class="text-base sm:text-xl font-black text-white mb-2" id="deviceModalTitle">Yayın İzni Onayı</h3>
-      <p class="text-xs sm:text-sm text-slate-300 mb-5 sm:mb-6 leading-relaxed" id="deviceModalDesc">
+      <p class="text-xs sm:text-sm text-slate-300 mb-5 leading-relaxed" id="deviceModalDesc">
         Cihazınızı açmak üzeresiniz. Canlı yayına iletilmesini onaylıyor musunuz?
       </p>
       <div class="flex items-center gap-2 sm:gap-3 mb-3">
@@ -826,11 +862,110 @@
 
       <!-- Kamera & Mikrofon Donanım Seçimi (Telefon veya Dahili Kamera Seçeneği) -->
       <div class="pt-2.5 border-t border-slate-800">
-        <button type="button" onclick="openJitsiDeviceSelection()" class="w-full text-indigo-400 hover:text-indigo-300 active:scale-95 text-xs font-bold py-1.5 px-3 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-700/50 flex items-center justify-center gap-1.5 transition">
+        <button type="button" onclick="openMediaDeviceSettingsModal()" class="w-full text-indigo-400 hover:text-indigo-300 active:scale-95 text-xs font-bold py-2 px-3 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-700/50 flex items-center justify-center gap-1.5 transition">
           <i class="fa-solid fa-sliders"></i>
-          <span>Kamera / Mikrofon Değiştir (Cihaz Seç)</span>
+          <span>Kamera / Mikrofon Cihazını Değiştir & Test Et</span>
         </button>
-        <p class="text-[10px] text-slate-400 mt-1.5 leading-tight">Windows'ta telefonunuz bağlanmaya çalışıyorsa buradan bilgisayar kamerasını seçebilirsiniz.</p>
+        <p class="text-[10px] text-slate-400 mt-1.5 leading-tight">Windows telefonunuza bağlanıyorsa buradan doğrudan bilgisayar kamerasını seçebilirsiniz.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KAMERA & MİKROFON CİHAZI SEÇME VE CANLI SES/GÖRÜNTÜ TEST MODALI -->
+  <div id="deviceSettingsModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-900 border-2 border-indigo-500 rounded-3xl p-5 sm:p-7 max-w-md w-full shadow-2xl flex flex-col max-h-[92dvh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 text-indigo-400 border border-indigo-500/50 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white">Kamera ve Mikrofon Ayarları</h3>
+            <p class="text-[11px] text-slate-400">Cihazınızı seçin ve canlı olarak test edin</p>
+          </div>
+        </div>
+        <button onclick="closeMediaDeviceSettingsModal()" class="text-slate-400 hover:text-white p-1 text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Canlı Önizleme Ekranı -->
+      <div class="relative bg-black rounded-2xl overflow-hidden border border-slate-700 h-44 sm:h-52 mb-4 shrink-0 flex items-center justify-center">
+        <video id="modalLivePreviewVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        <div class="absolute bottom-2 left-2 bg-slate-950/80 backdrop-blur px-2 py-0.5 rounded-md text-[10px] text-emerald-400 font-bold border border-emerald-500/40 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Canlı Önizleme</span>
+        </div>
+      </div>
+
+      <!-- Ses Seviyesi Göstergesi (Konuşunca bar oynar) -->
+      <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 mb-4 shrink-0">
+        <div class="flex items-center justify-between text-xs mb-1.5 font-bold">
+          <span class="text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-microphone-lines text-emerald-400"></i>
+            <span>Mikrofon Ses Düzeyi Testi:</span>
+          </span>
+          <span id="modalAudioMeterStatus" class="text-[10px] text-slate-400">Konuşarak test ediniz...</span>
+        </div>
+        <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-700 p-0.5">
+          <div id="modalAudioMeterBar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 rounded-full transition-all duration-75" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Kamera Seçimi -->
+      <div class="mb-3.5 text-left shrink-0">
+        <label class="text-xs font-bold text-slate-300 block mb-1">
+          <i class="fa-solid fa-video text-indigo-400 mr-1"></i> Kamera Seçimi:
+        </label>
+        <select id="modalVideoSource" onchange="startDeviceTestPreview()" class="w-full bg-slate-950 border-2 border-slate-700 text-white px-3 py-2.5 rounded-xl text-xs font-semibold focus:outline-none focus:border-indigo-500">
+          <option value="">Cihazlar taranıyor...</option>
+        </select>
+        <p class="text-[10px] text-slate-400 mt-1">Windows telefonunuza bağlanıyorsa buradan doğrudan bilgisayarınızın web kamerasını seçiniz.</p>
+      </div>
+
+      <!-- Mikrofon Seçimi -->
+      <div class="mb-5 text-left shrink-0">
+        <label class="text-xs font-bold text-slate-300 block mb-1">
+          <i class="fa-solid fa-microphone text-indigo-400 mr-1"></i> Mikrofon Seçimi:
+        </label>
+        <select id="modalAudioSource" onchange="startDeviceTestPreview()" class="w-full bg-slate-950 border-2 border-slate-700 text-white px-3 py-2.5 rounded-xl text-xs font-semibold focus:outline-none focus:border-indigo-500">
+          <option value="">Cihazlar taranıyor...</option>
+        </select>
+      </div>
+
+      <!-- Eylem Butonları -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        <button onclick="closeMediaDeviceSettingsModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-bold py-3 rounded-xl text-xs sm:text-sm">
+          Kapat
+        </button>
+        <button onclick="applySelectedMediaDevices()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black py-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-indigo-950 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Bu Cihazları Seç ve Kullan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DERSİ BİTİR VE OTURUMU KAPAT ONAY MODALI (SADECE EĞİTMEN MASASINDAN TETİKLENİR) -->
+  <div id="endLessonConfirmModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-red-600 rounded-3xl p-5 sm:p-8 max-w-sm w-full shadow-2xl text-center max-h-[92dvh] overflow-y-auto">
+      <div class="w-16 h-16 rounded-2xl bg-red-600/20 text-red-400 border border-red-500/40 flex items-center justify-center text-3xl mx-auto mb-3 sm:mb-4 shadow-xl shadow-red-950">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-lg sm:text-xl font-black text-white mb-2">Dersi Bitirmek İstiyor Musunuz?</h3>
+      <p class="text-xs sm:text-sm text-slate-300 mb-5 leading-relaxed">
+        Bu işlemi onaylarsanız canlı ders ve tüm oturum sonlandırılacaktır.
+        <br><br>
+        <strong class="text-amber-400">Tüm veriler sıfırlanacak ve sistem ilk açılış durumuna geri dönecektir.</strong>
+      </p>
+      <div class="flex items-center gap-2.5">
+        <button onclick="closeEndLessonModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-bold py-3 rounded-xl text-xs sm:text-sm">
+          Vazgeç
+        </button>
+        <button onclick="confirmAndEndLesson()" class="flex-1 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-black py-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-red-950 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-power-off"></i>
+          <span>Evet, Dersi Bitir</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1207,7 +1342,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         if (waitingNotice) waitingNotice.classList.add('hidden');
         if (modalSub) modalSub.innerText = "Canlı eğitime katılmak için lütfen Adınızı ve Ders Şifrenizi yazınız:";
         const codeInput = document.getElementById('userClassCodeInput');
-        if (codeInput && activeClassCode) codeInput.value = activeClassCode;
+        if (codeInput) codeInput.value = "";
         const nameInput = document.getElementById('userFullNameInput');
         if (nameInput) nameInput.focus();
       }
@@ -1347,9 +1482,9 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       const deskDisplay = document.getElementById('deskClassCodeDisplay');
       if (deskDisplay) deskDisplay.innerText = activeClassCode;
 
-      // Katılımcı giriş inputuna da aktar
+      // Katılımcı giriş inputu boş bırakılır (Kullanıcı kendisi yazar)
       const userInput = document.getElementById('userClassCodeInput');
-      if (userInput) userInput.value = activeClassCode;
+      if (userInput) userInput.value = "";
 
       // "Ders Şifresi Al" butonunu herkesin ekranından kalıcı olarak kaldır
       hideClassCodeBtnPermanently();
@@ -1482,31 +1617,29 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       }
     }
 
-    // 4. MİKROFON VE KAMERA KONTROLLERİ (AÇARKEN HER SEFERİNDE İZİN İSTER)
+    // 4. MİKROFON VE KAMERA KONTROLLERİ (CANLI YANSITMA & CİHAZ YÖNETİMİ)
+    let currentSelectedVideoDeviceId = "";
+    let currentSelectedAudioDeviceId = "";
+    let localLiveCameraStream = null;
+    let localLiveAudioStream = null;
+    let previewTestStream = null;
+    let isTestingAudioInModal = false;
+    let webAudioContext = null;
+    let webAudioAnalyser = null;
+    let webAudioAnimId = null;
+
     function toggleMicWithPermission() {
-      if (!jitsiApi) {
-        showToast("Odaya bağlanılıyor, lütfen bekleyin.");
-        return;
-      }
       if (isMicOn) {
-        // Zaten açık, kapatırken izin istemeden hemen kapat
-        jitsiApi.executeCommand('toggleAudio');
+        stopLocalAudio();
       } else {
-        // Kapalı, açarken her seferinde onay modalı göster
         openDeviceConfirmModal('mic');
       }
     }
 
     function toggleCamWithPermission() {
-      if (!jitsiApi) {
-        showToast("Odaya bağlanılıyor, lütfen bekleyin.");
-        return;
-      }
       if (isCamOn) {
-        // Zaten açık, kapatırken izin istemeden hemen kapat
-        jitsiApi.executeCommand('toggleVideo');
+        stopLocalCamera();
       } else {
-        // Kapalı, açarken her seferinde onay modalı göster
         openDeviceConfirmModal('cam');
       }
     }
@@ -1534,38 +1667,421 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       const modal = document.getElementById('deviceConfirmModal');
       modal.classList.add('hidden');
 
-      if (approved && jitsiApi) {
+      if (approved) {
         const target = pendingDeviceToActivate;
-        // Tarayıcı doğrudan izin sorgusunu önden güvenle tetikle
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          try {
-            const constraints = target === 'mic' ? { audio: true } : { video: true };
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            stream.getTracks().forEach(t => t.stop());
-          } catch (err) {
-            console.warn("Tarayıcı doğrudan medya isteği:", err);
-          }
-        }
-
         if (target === 'mic') {
-          jitsiApi.executeCommand('toggleAudio');
+          await startLocalAudio();
         } else if (target === 'cam') {
-          jitsiApi.executeCommand('toggleVideo');
+          await startLocalCamera();
         }
       }
       pendingDeviceToActivate = null;
     }
 
-    function openJitsiDeviceSelection() {
+    // 4.1 CANLI YEREL KAMERA BAŞLATMA VE YANSITMA
+    async function startLocalCamera() {
+      try {
+        if (localLiveCameraStream) {
+          localLiveCameraStream.getTracks().forEach(t => t.stop());
+        }
+
+        const constraints = {
+          video: currentSelectedVideoDeviceId ? { deviceId: { exact: currentSelectedVideoDeviceId } } : true
+        };
+
+        localLiveCameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        // 1. Şerit barındaki kartta kamerayı yansıt
+        const stripVideo = document.getElementById('stripInstructorLiveVideo');
+        const stripAvatar = document.getElementById('stripInstructorAvatarIcon');
+        const stripDot = document.getElementById('stripInstructorLiveDot');
+        const stripStatus = document.getElementById('stripInstructorCamStatus');
+
+        if (stripVideo) {
+          stripVideo.srcObject = localLiveCameraStream;
+          stripVideo.classList.remove('hidden');
+          if (stripAvatar) stripAvatar.classList.add('hidden');
+          if (stripDot) stripDot.classList.remove('hidden');
+          if (stripStatus) {
+            stripStatus.className = "text-[9px] text-emerald-400 font-semibold flex items-center gap-1";
+            stripStatus.innerHTML = '<i class="fa-solid fa-video text-[8px]"></i> Kamera Açık';
+          }
+          stripVideo.play().catch(()=>{});
+        }
+
+        // 2. Ana video sahnesindeki canlı kamera kutucuğunu yansıt
+        const stageOverlay = document.getElementById('localCameraStageOverlay');
+        const stageVideo = document.getElementById('stageLocalVideo');
+        if (stageOverlay && stageVideo) {
+          stageVideo.srcObject = localLiveCameraStream;
+          stageOverlay.classList.remove('hidden');
+          stageVideo.play().catch(()=>{});
+        }
+
+        // 3. Jitsi Meet'e ilet
+        if (jitsiApi) {
+          jitsiApi.executeCommand('toggleVideo');
+        }
+
+        isCamOn = true;
+        updateCamUI(true);
+      } catch (err) {
+        console.warn("Kamera başlatma hatası:", err);
+        showToast("Kamera açılamadı. 'Cihazlar' butonundan web kameranızı seçebilirsiniz.");
+        openMediaDeviceSettingsModal();
+      }
+    }
+
+    function stopLocalCamera() {
+      if (localLiveCameraStream) {
+        localLiveCameraStream.getTracks().forEach(t => t.stop());
+        localLiveCameraStream = null;
+      }
+
+      const stripVideo = document.getElementById('stripInstructorLiveVideo');
+      const stripAvatar = document.getElementById('stripInstructorAvatarIcon');
+      const stripDot = document.getElementById('stripInstructorLiveDot');
+      const stripStatus = document.getElementById('stripInstructorCamStatus');
+
+      if (stripVideo) {
+        stripVideo.classList.add('hidden');
+        stripVideo.srcObject = null;
+        if (stripAvatar) stripAvatar.classList.remove('hidden');
+        if (stripDot) stripDot.classList.add('hidden');
+        if (stripStatus) {
+          stripStatus.className = "text-[9px] text-slate-400 font-semibold flex items-center gap-1";
+          stripStatus.innerHTML = '<i class="fa-solid fa-video-slash text-[8px]"></i> Kamera Kapalı';
+        }
+      }
+
+      const stageOverlay = document.getElementById('localCameraStageOverlay');
+      if (stageOverlay) stageOverlay.classList.add('hidden');
+
+      if (jitsiApi && isCamOn) {
+        jitsiApi.executeCommand('toggleVideo');
+      }
+
+      isCamOn = false;
+      updateCamUI(false);
+    }
+
+    // 4.2 CANLI YEREL MİKROFON VE GERÇEK ZAMANLI SES SEVİYESİ
+    async function startLocalAudio() {
+      try {
+        if (localLiveAudioStream) {
+          localLiveAudioStream.getTracks().forEach(t => t.stop());
+        }
+
+        const constraints = {
+          audio: currentSelectedAudioDeviceId ? { deviceId: { exact: currentSelectedAudioDeviceId } } : true
+        };
+
+        localLiveAudioStream = await navigator.mediaDevices.getUserMedia(constraints);
+        startAudioLevelMonitoring(localLiveAudioStream);
+
+        if (jitsiApi) {
+          jitsiApi.executeCommand('toggleAudio');
+        }
+
+        isMicOn = true;
+        updateMicUI(true);
+      } catch (err) {
+        console.warn("Mikrofon başlatma hatası:", err);
+        showToast("Mikrofon açılamadı. 'Cihazlar' butonundan mikrofonunuzu seçebilirsiniz.");
+        openMediaDeviceSettingsModal();
+      }
+    }
+
+    function stopLocalAudio() {
+      if (localLiveAudioStream) {
+        localLiveAudioStream.getTracks().forEach(t => t.stop());
+        localLiveAudioStream = null;
+      }
+
+      if (webAudioAnimId) {
+        cancelAnimationFrame(webAudioAnimId);
+        webAudioAnimId = null;
+      }
+
+      if (jitsiApi && isMicOn) {
+        jitsiApi.executeCommand('toggleAudio');
+      }
+
+      isMicOn = false;
+      updateMicUI(false);
+    }
+
+    function startAudioLevelMonitoring(stream) {
+      try {
+        if (!webAudioContext) {
+          webAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (webAudioContext.state === 'suspended') {
+          webAudioContext.resume();
+        }
+
+        const source = webAudioContext.createMediaStreamSource(stream);
+        webAudioAnalyser = webAudioContext.createAnalyser();
+        webAudioAnalyser.fftSize = 256;
+        source.connect(webAudioAnalyser);
+
+        const dataArr = new Uint8Array(webAudioAnalyser.frequencyBinCount);
+
+        function renderAudioLevel() {
+          if (!isMicOn && !isTestingAudioInModal) return;
+          webAudioAnalyser.getByteFrequencyData(dataArr);
+          let sum = 0;
+          for (let i = 0; i < dataArr.length; i++) {
+            sum += dataArr[i];
+          }
+          let avg = sum / dataArr.length;
+          let levelPercent = Math.min(100, Math.round((avg / 128) * 100));
+
+          // Ayarlar modalındaki göstergeyi güncelle
+          const modalBar = document.getElementById('modalAudioMeterBar');
+          const modalStatus = document.getElementById('modalAudioMeterStatus');
+          if (modalBar) {
+            modalBar.style.width = levelPercent + '%';
+          }
+          if (modalStatus) {
+            modalStatus.innerText = levelPercent > 10 ? `Ses algılanıyor (${levelPercent}%) 🎙️` : "Konuşarak test ediniz...";
+          }
+
+          // Sahne kutusundaki mikrofon göstergesi
+          const stageStatus = document.getElementById('stageLocalAudioStatus');
+          if (stageStatus && isMicOn) {
+            stageStatus.innerText = levelPercent > 10 ? "Konuşuyorsunuz 🎙️" : "Mikrofon Açık";
+          }
+
+          // Alt bardaki ve şerit bardaki konuşma göstergeleri
+          const pulseDot = document.getElementById('speakerPulseDot');
+          if (pulseDot) {
+            if (levelPercent > 12) {
+              pulseDot.classList.remove('hidden');
+            } else {
+              pulseDot.classList.add('hidden');
+            }
+          }
+
+          webAudioAnimId = requestAnimationFrame(renderAudioLevel);
+        }
+        renderAudioLevel();
+      } catch (e) {
+        console.warn("Audio monitoring error:", e);
+      }
+    }
+
+    // 4.3 GELİŞMİŞ DONANIM AYARLARI MODALI (KAMERA & MİKROFON SEÇİMİ)
+    async function openMediaDeviceSettingsModal() {
+      const modal = document.getElementById('deviceSettingsModal');
+      if (modal) modal.classList.remove('hidden');
+      isTestingAudioInModal = true;
+      await populateMediaDeviceOptions();
+      await startDeviceTestPreview();
+    }
+
+    function closeMediaDeviceSettingsModal() {
+      const modal = document.getElementById('deviceSettingsModal');
+      if (modal) modal.classList.add('hidden');
+      isTestingAudioInModal = false;
+
+      if (previewTestStream) {
+        previewTestStream.getTracks().forEach(t => t.stop());
+        previewTestStream = null;
+      }
+      const prevVideo = document.getElementById('modalLivePreviewVideo');
+      if (prevVideo) prevVideo.srcObject = null;
+    }
+
+    async function populateMediaDeviceOptions() {
+      const videoSelect = document.getElementById('modalVideoSource');
+      const audioSelect = document.getElementById('modalAudioSource');
+      if (!videoSelect || !audioSelect) return;
+
+      videoSelect.innerHTML = '<option value="">Cihazlar taranıyor...</option>';
+      audioSelect.innerHTML = '<option value="">Cihazlar taranıyor...</option>';
+
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            const probe = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            probe.getTracks().forEach(t => t.stop());
+          } catch(e){}
+        }
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        videoSelect.innerHTML = '';
+        audioSelect.innerHTML = '';
+
+        let vCount = 0;
+        let aCount = 0;
+
+        devices.forEach(dev => {
+          if (dev.kind === 'videoinput') {
+            vCount++;
+            const opt = document.createElement('option');
+            opt.value = dev.deviceId;
+            let label = dev.label || `Kamera ${vCount}`;
+            if (label.toLowerCase().includes('phone') || label.toLowerCase().includes('telefon') || label.toLowerCase().includes('virtual')) {
+              label = `📱 ${label} (Telefon / Sanal)`;
+            } else {
+              label = `📷 ${label} (Dahili / USB Web Kamerası)`;
+            }
+            opt.text = label;
+            if (dev.deviceId === currentSelectedVideoDeviceId) opt.selected = true;
+            videoSelect.appendChild(opt);
+          } else if (dev.kind === 'audioinput') {
+            aCount++;
+            const opt = document.createElement('option');
+            opt.value = dev.deviceId;
+            opt.text = `🎤 ${dev.label || `Mikrofon ${aCount}`}`;
+            if (dev.deviceId === currentSelectedAudioDeviceId) opt.selected = true;
+            audioSelect.appendChild(opt);
+          }
+        });
+
+        if (vCount === 0) {
+          videoSelect.innerHTML = '<option value="">Kamera bulunamadı</option>';
+        }
+        if (aCount === 0) {
+          audioSelect.innerHTML = '<option value="">Mikrofon bulunamadı</option>';
+        }
+      } catch (err) {
+        console.error("Cihaz tarama hatası:", err);
+      }
+    }
+
+    async function startDeviceTestPreview() {
+      if (previewTestStream) {
+        previewTestStream.getTracks().forEach(t => t.stop());
+        previewTestStream = null;
+      }
+
+      const videoSelect = document.getElementById('modalVideoSource');
+      const audioSelect = document.getElementById('modalAudioSource');
+      const vId = videoSelect ? videoSelect.value : "";
+      const aId = audioSelect ? audioSelect.value : "";
+
+      const constraints = {
+        video: vId ? { deviceId: { exact: vId } } : true,
+        audio: aId ? { deviceId: { exact: aId } } : true
+      };
+
+      try {
+        previewTestStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const prevVideo = document.getElementById('modalLivePreviewVideo');
+        if (prevVideo) {
+          prevVideo.srcObject = previewTestStream;
+          prevVideo.play().catch(()=>{});
+        }
+        startAudioLevelMonitoring(previewTestStream);
+      } catch (err) {
+        console.warn("Önizleme başlatılamadı:", err);
+      }
+    }
+
+    async function applySelectedMediaDevices() {
+      const videoSelect = document.getElementById('modalVideoSource');
+      const audioSelect = document.getElementById('modalAudioSource');
+
+      if (videoSelect && videoSelect.value) {
+        currentSelectedVideoDeviceId = videoSelect.value;
+      }
+      if (audioSelect && audioSelect.value) {
+        currentSelectedAudioDeviceId = audioSelect.value;
+      }
+
+      // Jitsi Meet'e donanım değişikliklerini aktar
       if (jitsiApi) {
         try {
-          jitsiApi.executeCommand('toggleDeviceSelection');
-        } catch (e) {
-          console.warn("Cihaz seçim komutu:", e);
+          if (videoSelect && videoSelect.selectedOptions[0]) {
+            const vLabel = videoSelect.selectedOptions[0].text;
+            if (jitsiApi.setVideoInputDevice) {
+              jitsiApi.setVideoInputDevice(vLabel, currentSelectedVideoDeviceId);
+            }
+          }
+          if (audioSelect && audioSelect.selectedOptions[0]) {
+            const aLabel = audioSelect.selectedOptions[0].text;
+            if (jitsiApi.setAudioInputDevice) {
+              jitsiApi.setAudioInputDevice(aLabel, currentSelectedAudioDeviceId);
+            }
+          }
+        } catch(e) {
+          console.warn("Jitsi device set:", e);
         }
-      } else {
-        showToast("Canlı yayın motoruna bağlanılıyor, lütfen birkaç saniye bekleyin.");
       }
+
+      // Canlı yayın açıksa seçilen aygıtla yeniden başlat
+      if (isCamOn) {
+        await startLocalCamera();
+      }
+      if (isMicOn) {
+        await startLocalAudio();
+      }
+
+      closeMediaDeviceSettingsModal();
+      showToast("Kamera ve mikrofon seçiminiz başarıyla kaydedildi!");
+    }
+
+    // 4.4 DERSİ BİTİR VE OTURUMU SIFIRLA İŞLEMLERİ (SADECE EĞİTMEN MASASI)
+    function requestEndLessonModal() {
+      const modal = document.getElementById('endLessonConfirmModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeEndLessonModal() {
+      const modal = document.getElementById('endLessonConfirmModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function confirmAndEndLesson() {
+      closeEndLessonModal();
+      showToast("Ders sonlandırılıyor, sistem sıfırlanıyor...");
+
+      // 1. Ekran / ders kaydı varsa güvenle durdur
+      if (isRecording && mediaRecorder) {
+        try { mediaRecorder.stop(); } catch(e){}
+      }
+
+      // 2. Canlı yerel kamera ve mikrofon akışlarını kapat
+      if (localLiveCameraStream) {
+        localLiveCameraStream.getTracks().forEach(t => t.stop());
+        localLiveCameraStream = null;
+      }
+      if (localLiveAudioStream) {
+        localLiveAudioStream.getTracks().forEach(t => t.stop());
+        localLiveAudioStream = null;
+      }
+      if (previewTestStream) {
+        previewTestStream.getTracks().forEach(t => t.stop());
+        previewTestStream = null;
+      }
+
+      // 3. Jitsi toplantısını sonlandır ve sil
+      if (jitsiApi) {
+        try {
+          jitsiApi.executeCommand('hangup');
+          jitsiApi.dispose();
+        } catch(e){}
+        jitsiApi = null;
+      }
+
+      // 4. Tüm oturum, hafıza ve şifre verilerini sıfırla
+      sessionStorage.clear();
+      localStorage.removeItem('afet_active_class_code');
+      localStorage.removeItem('afet_instructor_authed');
+      activeClassCode = "";
+      isClassCodeCreated = false;
+      isInstructorSessionAuthenticated = false;
+      isInstructor = false;
+      userQuizScore = 0;
+      userAnswers = {};
+
+      // 5. URL hash'i temizle ve sayfayı sıfırdan yeniden başlat
+      window.location.hash = "";
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
 
     function updateMicUI(active) {
@@ -3257,7 +3773,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         hideClassCodeBtnPermanently();
 
         const input = document.getElementById('userClassCodeInput');
-        if (input) input.value = activeClassCode;
+        if (input) input.value = "";
 
         const deskDisplay = document.getElementById('deskClassCodeDisplay');
         if (deskDisplay) deskDisplay.innerText = activeClassCode;
