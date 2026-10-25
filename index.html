@@ -188,7 +188,15 @@
         </button>
       </div>
 
-      <p class="text-[11px] text-slate-500 mt-4">Sıfır kurulum gerektirir. Girişte mikrofonunuz ve kameranız kapalı başlar.</p>
+      <!-- Eski Oturumu Sıfırlama Butonu (Eski Oturum Takılı Kaldığında veya Yeni Ders Başlatmak İçin) -->
+      <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-center gap-2">
+        <button type="button" onclick="promptResetSession()" class="text-xs text-rose-400 hover:text-rose-300 font-bold flex items-center justify-center gap-1.5 active:scale-95 transition bg-rose-950/40 hover:bg-rose-900/40 px-3 py-1.5 rounded-xl border border-rose-800/40" title="Eski Oturumu Sıfırla">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Eski Oturumu Sıfırla / Yeni Ders Başlat</span>
+        </button>
+      </div>
+
+      <p class="text-[11px] text-slate-500 mt-2">Sıfır kurulum gerektirir. Girişte mikrofonunuz ve kameranız kapalı başlar.</p>
     </div>
   </div>
 
@@ -234,6 +242,12 @@
       <button id="whatsappShareBtn" onclick="shareWhatsApp()" class="shrink-0 flex items-center gap-1 sm:gap-1.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl transition shadow-md shadow-emerald-950" title="WhatsApp ile Davet Et">
         <i class="fa-brands fa-whatsapp text-sm sm:text-base"></i>
         <span class="hidden sm:inline">Davet Et</span>
+      </button>
+
+      <!-- Dersi Bitir Butonu (SADECE EĞİTMEN YETKİSİ ALINDIĞINDA ÜST MENÜDE GÖRÜNÜR) -->
+      <button id="headerEndLessonBtn" onclick="requestEndLessonModal()" class="hidden shrink-0 flex items-center gap-1 sm:gap-1.5 bg-red-700 hover:bg-red-600 active:scale-95 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl transition border border-red-500/50 shadow-md" title="Canlı Dersi Tamamen Bitir">
+        <i class="fa-solid fa-power-off text-xs sm:text-sm text-red-200"></i>
+        <span class="hidden sm:inline">Dersi Bitir</span>
       </button>
 
       <!-- Eğitmen / Moderatör Masası Geçişi (Şifre oturumda 1 kez istenir: @Fruwruci9) -->
@@ -1502,7 +1516,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
 
       activeClassCode = code;
       isClassCodeCreated = true;
-      localStorage.setItem('afet_active_class_code', activeClassCode);
+      sessionStorage.setItem('afet_active_class_code', activeClassCode);
       window.location.hash = 'code=' + encodeURIComponent(activeClassCode);
 
       // Giriş modalını güncelle (Eğitmen girişi kaybolur, katılımcı girişi aktifleşir)
@@ -2094,6 +2108,12 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       if (modal) modal.classList.add('hidden');
     }
 
+    function promptResetSession() {
+      openPasswordModal("Oturumu Sıfırlama Yetkisi", "Eski ders oturumunu ve şifresini tamamen sıfırlamak için eğitmen şifrenizi (@Fruwruci9) giriniz:", () => {
+        confirmAndEndLesson();
+      });
+    }
+
     function confirmAndEndLesson() {
       closeEndLessonModal();
       showToast("Ders sonlandırılıyor, sistem sıfırlanıyor...");
@@ -2126,10 +2146,9 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         jitsiApi = null;
       }
 
-      // 4. Tüm oturum, hafıza ve şifre verilerini sıfırla
+      // 4. Tüm oturum, hafıza ve şifre verilerini kökünden sıfırla
       sessionStorage.clear();
-      localStorage.removeItem('afet_active_class_code');
-      localStorage.removeItem('afet_instructor_authed');
+      localStorage.clear();
       activeClassCode = "";
       isClassCodeCreated = false;
       isInstructorSessionAuthenticated = false;
@@ -2137,11 +2156,9 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       userQuizScore = 0;
       userAnswers = {};
 
-      // 5. URL hash'i temizle ve sayfayı sıfırdan yeniden başlat
-      window.location.hash = "";
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // 5. URL hash'i ve eski oda kodunu temizleyip tertemiz ana sayfaya yönlendir
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.location.href = cleanUrl;
     }
 
     function updateMicUI(active) {
@@ -2332,6 +2349,8 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       document.getElementById('instructorPanel').classList.remove('hidden');
       document.getElementById('viewSwitcherContainer').classList.remove('hidden');
       document.getElementById('instructorQuizActions').classList.remove('hidden');
+      const hEndBtn = document.getElementById('headerEndLessonBtn');
+      if (hEndBtn) hEndBtn.classList.remove('hidden');
       const stripName = document.getElementById('stripInstructorName');
       if (stripName) stripName.innerText = currentUserName + " (Eğitmen / Moderatör)";
       showToast("Eğitmen / Moderatör Masası açıldı. Tüm yetkiler aktif.");
@@ -2348,6 +2367,8 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       document.getElementById('instructorPanel').classList.add('hidden');
       document.getElementById('viewSwitcherContainer').classList.add('hidden');
       document.getElementById('instructorQuizActions').classList.add('hidden');
+      const hEndBtn = document.getElementById('headerEndLessonBtn');
+      if (hEndBtn) hEndBtn.classList.add('hidden');
       const stripName = document.getElementById('stripInstructorName');
       if (stripName) stripName.innerText = "Eğitmen / Moderatör";
       switchMainView('video');
@@ -3824,7 +3845,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
 
     function initClassCodeFromUrlOrStorage() {
       const urlCode = parseUrlCode();
-      const storedCode = localStorage.getItem('afet_active_class_code');
+      const storedCode = sessionStorage.getItem('afet_active_class_code');
       const foundCode = urlCode || storedCode;
 
       if (foundCode) {
