@@ -2672,6 +2672,9 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       // 3. Jitsi toplantısını sonlandır ve sil
       if (jitsiApi) {
         try {
+          if (isInstructor) {
+            broadcastAfetSync({ action: 'LESSON_ENDED' });
+          }
           jitsiApi.executeCommand('hangup');
           jitsiApi.dispose();
         } catch(e){}
@@ -2782,7 +2785,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
     }
 
     // 6. GÖRÜNÜM DEĞİŞTİR (HATA VERMEYEN VE TESTİ EKRANA KESİN GETİREN GÜVENLİ FONKSİYON)
-    function switchMainView(mode) {
+    function switchMainView(mode, skipBroadcast = false) {
       currentMainView = mode;
       const videoView = document.getElementById('videoView');
       const docView = document.getElementById('docView');
@@ -2812,6 +2815,10 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         if (quizView) quizView.classList.remove('hidden');
         if (btnQuiz) btnQuiz.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition bg-purple-600 text-white shadow";
         renderQuizQuestion(currentQuizIndex);
+      }
+
+      if (!skipBroadcast && isInstructor) {
+        broadcastAfetSync({ action: 'VIEW_SWITCH', view: mode });
       }
     }
 
@@ -3357,8 +3364,14 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         if (panel) panel.classList.add('hidden');
       }
 
-      switchMainView('quiz');
-      showToast(`Değerlendirme testi başlatıldı! Soru süresi: ${quizDuration} saniye.`);
+      switchMainView('quiz', true);
+      broadcastAfetSync({
+        action: 'QUIZ_START',
+        duration: quizDuration,
+        index: 0,
+        questions: quizQuestions
+      });
+      showToast(`Değerlendirme testi başlatıldı ve tüm sınıfa iletildi! Süre: ${quizDuration} sn.`);
     }
 
     function startQuizTimer() {
@@ -3531,9 +3544,17 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       }
 
       showToast(`${key} şıkkını işaretlediniz. Doğru cevap bekleniyor.`);
+
+      // Eğitmene canlı yanıtı ilet
+      broadcastAfetSync({
+        action: 'QUIZ_ANSWER',
+        user: currentUserName,
+        option: key,
+        qIndex: currentQuizIndex
+      });
     }
 
-    function revealAnswer() {
+    function revealAnswer(skipBroadcast = false) {
       stopQuizTimer();
       const q = quizQuestions[currentQuizIndex];
       isAnswerRevealed = true;
@@ -3565,11 +3586,15 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         userQuizScore += 100;
         document.getElementById('quizScoreDisplay').innerText = `${userQuizScore} Puan`;
         showToast("Tebrikler! Doğru cevap verdiniz (+100 Puan).");
-      } else {
+      } else if (userChoice) {
         showToast(`Cevap ${q.answer} olmalıydı.`);
       }
 
       document.getElementById('quizExplanationBox').classList.remove('hidden');
+
+      if (!skipBroadcast && isInstructor) {
+        broadcastAfetSync({ action: 'QUIZ_REVEAL', index: currentQuizIndex });
+      }
     }
 
     function nextQuizQuestion() {
@@ -3577,8 +3602,14 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       if (currentQuizIndex + 1 < quizQuestions.length) {
         currentQuizIndex++;
         renderQuizQuestion(currentQuizIndex);
+        if (isInstructor) {
+          broadcastAfetSync({ action: 'QUIZ_NEXT', index: currentQuizIndex });
+        }
       } else {
         showQuizResults();
+        if (isInstructor) {
+          broadcastAfetSync({ action: 'QUIZ_FINISH' });
+        }
       }
     }
 
@@ -4142,6 +4173,73 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       }
     }
 
+    // 14. GERÇEK ZAMANLI SINIF SENKRONİZASYONU (JITSI DATA BUS)
+    function broadcastAfetSync(payload) {
+      if (jitsiApi) {
+        try {
+          const msg = `[AFET_SYNC]` + JSON.stringify(payload);
+          jitsiApi.executeCommand('sendChatMessage', msg, '', true);
+        } catch(e) {
+          console.warn("Sync mesajı gönderilemedi:", e);
+        }
+      }
+    }
+
+    function handleIncomingAfetSync(sender, payload) {
+      if (!payload || !payload.action) return;
+
+      switch (payload.action) {
+        case 'QUIZ_START':
+          if (!isInstructor) {
+            if (payload.questions && payload.questions.length) {
+              quizQuestions = payload.questions;
+            }
+            quizDuration = payload.duration || 30;
+            currentQuizIndex = payload.index || 0;
+            userQuizScore = 0;
+            userAnswers = {};
+            switchMainView('quiz', true);
+            showToast(`Eğitmen canlı değerlendirme testini başlattı!`);
+          }
+          break;
+
+        case 'QUIZ_NEXT':
+          if (!isInstructor) {
+            currentQuizIndex = payload.index || 0;
+            renderQuizQuestion(currentQuizIndex);
+          }
+          break;
+
+        case 'QUIZ_REVEAL':
+          if (!isInstructor) {
+            revealAnswer(true);
+          }
+          break;
+
+        case 'QUIZ_FINISH':
+          if (!isInstructor) {
+            showQuizResults();
+          }
+          break;
+
+        case 'QUIZ_ANSWER':
+          if (isInstructor) {
+            showToast(`📝 ${payload.user || sender} "${payload.option}" şıkkını işaretledi.`);
+          }
+          break;
+
+        case 'VIEW_SWITCH':
+          if (!isInstructor && payload.view) {
+            switchMainView(payload.view, true);
+          }
+          break;
+
+        case 'LESSON_ENDED':
+          leaveMeetingWithNotice("Eğitmen canlı dersi sonlandırdı. Katılımınız ve duyarlılığınız için teşekkür ederiz.");
+          break;
+      }
+    }
+
     function sendChatMessage() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
@@ -4159,13 +4257,26 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
     }
 
     function receiveChatMessage(sender, text) {
+      // Arka plan senkronizasyon mesajı kontrolü (Sohbet ekranında gizlenir, motoru tetikler)
+      if (typeof text === 'string' && text.startsWith('[AFET_SYNC]')) {
+        try {
+          const payload = JSON.parse(text.substring(11));
+          handleIncomingAfetSync(sender, payload);
+        } catch(e) {
+          console.warn("Sync parse error:", e);
+        }
+        return;
+      }
+
       appendChatMessage(sender, text, false);
       const drawer = document.getElementById('chatDrawer');
       if (drawer.classList.contains('hidden')) {
         unreadChatCount++;
         const badge = document.getElementById('chatBadge');
-        badge.innerText = unreadChatCount;
-        badge.classList.remove('hidden');
+        if (badge) {
+          badge.innerText = unreadChatCount;
+          badge.classList.remove('hidden');
+        }
       }
     }
 
