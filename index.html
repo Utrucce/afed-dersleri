@@ -57,6 +57,152 @@
     button, input, select, label {
       touch-action: manipulation;
     }
+    /* Mobil Ekranda Yatay Kaymayı (Scroll) ve Tuşların Kaymasını Kesin Engelleme */
+    html, body {
+      width: 100% !important;
+      max-width: 100vw !important;
+      height: 100% !important;
+      height: 100dvh !important;
+      overflow: hidden !important;
+      overscroll-behavior: none !important;
+      touch-action: pan-y !important;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #mainFooterBar {
+      width: 100% !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+      overflow-y: hidden !important;
+      touch-action: manipulation !important;
+    }
+    /* Mobilde Alt Butonların Asla Kaymaması, Sıkışmaması ve Taşmaması İçin */
+    @media (max-width: 639px) {
+      #mainFooterBar {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+        padding-top: 0.35rem !important;
+        padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px)) !important;
+      }
+      #participantControls {
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 0.2rem !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #participantControls .footer-ctrl-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: 0.35rem 0.1rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 0.75rem !important;
+      }
+      #participantControls .footer-ctrl-btn > div:first-child,
+      #participantControls .footer-ctrl-btn > div[id$="Box"] {
+        width: 1.75rem !important;
+        height: 1.75rem !important;
+        font-size: 0.75rem !important;
+      }
+      #participantControls .footer-ctrl-btn .truncate {
+        max-width: 100% !important;
+        font-size: 8px !important;
+        line-height: 1.1 !important;
+        text-align: center !important;
+      }
+      header {
+        padding-left: 0.35rem !important;
+        padding-right: 0.35rem !important;
+      }
+      header h1 {
+        font-size: 0.8rem !important;
+      }
+      header button {
+        padding-left: 0.4rem !important;
+        padding-right: 0.4rem !important;
+        font-size: 0.7rem !important;
+      }
+      #mainFooterBar.footer-quiz-mode {
+        flex-direction: column !important;
+        gap: 0.35rem !important;
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+      }
+      #mainFooterBar.footer-quiz-mode #quizFooterOptionsContainer {
+        width: 100% !important;
+        max-width: 100% !important;
+        justify-content: center !important;
+      }
+      #mainFooterBar.footer-quiz-mode #participantControls {
+        width: 100% !important;
+        transform: none !important;
+        gap: 0.15rem !important;
+      }
+    }
+    /* Kamera Sanal Arka Plan Temaları */
+    .bg-theme-original {
+      background: #020617 !important;
+    }
+    .bg-theme-blur {
+      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 60%, #020617 100%) !important;
+      backdrop-filter: blur(24px) !important;
+    }
+    .bg-theme-kizilay {
+      background: radial-gradient(circle at center, #991b1b 0%, #450a0a 60%, #020617 100%) !important;
+      position: relative;
+    }
+    .bg-theme-kizilay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(239, 68, 68, 0.2) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+    .bg-theme-classroom {
+      background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 70%, #020617 100%) !important;
+      position: relative;
+    }
+    .bg-theme-classroom::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+    .bg-theme-library {
+      background: radial-gradient(circle at center, #3b200b 0%, #1c1005 65%, #020617 100%) !important;
+      position: relative;
+    }
+    .bg-theme-library::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(245, 158, 11, 0.15) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+    }
+    .bg-theme-sahra {
+      background: radial-gradient(circle at center, #064e3b 0%, #022c22 65%, #020617 100%) !important;
+      position: relative;
+    }
+    .bg-theme-sahra::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(16, 185, 129, 0.15) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
     /* iOS Çentik ve Alt Gösterge Alanı Uyumluluğu */
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
       #mainFooterBar {
@@ -90,30 +236,32 @@
       color: white;
       background: rgba(0, 0, 0, 0.25);
     }
-    /* Test Başlatılınca Alt Barın Kahoot Tarzı Şıklarla Düzenlenmesi (Sağa Kayma & Küçülme) */
-    #mainFooterBar.footer-quiz-mode {
-      justify-content: space-between !important;
-      padding-left: 0.5rem !important;
-      padding-right: 0.5rem !important;
-    }
-    #mainFooterBar.footer-quiz-mode #quizFooterOptionsContainer {
-      display: flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-      gap: 0.35rem !important;
-      overflow-x: auto !important;
-    }
-    .footer-quiz-mode #participantControls {
-      margin-left: auto !important;
-      flex-shrink: 0 !important;
-      width: auto !important;
-      max-width: none !important;
-      justify-content: flex-end !important;
-      gap: 0.25rem !important;
-      transform: scale(0.92);
-      transform-origin: right center;
+    /* Test Başlatılınca Alt Barın Kahoot Tarzı Şıklarla Düzenlenmesi (Masaüstü & Tablet) */
+    @media (min-width: 640px) {
+      #mainFooterBar.footer-quiz-mode {
+        justify-content: space-between !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+      #mainFooterBar.footer-quiz-mode #quizFooterOptionsContainer {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        gap: 0.35rem !important;
+        overflow-x: auto !important;
+      }
+      .footer-quiz-mode #participantControls {
+        margin-left: auto !important;
+        flex-shrink: 0 !important;
+        width: auto !important;
+        max-width: none !important;
+        justify-content: flex-end !important;
+        gap: 0.25rem !important;
+        transform: scale(0.92);
+        transform-origin: right center;
+      }
     }
     .footer-quiz-mode #participantControls .footer-ctrl-btn {
       padding: 0.35rem 0.5rem !important;
@@ -135,27 +283,53 @@
 
   <!-- GİRİŞ EKRANI (KATILIMCI & EĞİTMEN / MODERATÖR GİRİŞİ) -->
   <div id="joinModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border-2 border-red-600/80 rounded-3xl p-5 sm:p-8 max-w-md w-full shadow-2xl text-center relative overflow-y-auto max-h-[96dvh]">
+    <div class="bg-slate-900 border-2 border-red-600/80 rounded-3xl p-5 sm:p-7 max-w-md w-full shadow-2xl text-center relative overflow-y-auto max-h-[96dvh]">
       <div class="absolute -right-12 -top-12 w-40 h-40 bg-red-600/10 rounded-full blur-2xl pointer-events-none"></div>
 
       <!-- Kızılay Hilali -->
-      <div class="w-16 h-16 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-xl shadow-red-900/60 mx-auto mb-3">
-        <svg class="w-9 h-9 fill-current text-white -rotate-12" viewBox="0 0 24 24">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-xl shadow-red-900/60 mx-auto mb-2.5">
+        <svg class="w-8 h-8 sm:w-9 sm:h-9 fill-current text-white -rotate-12" viewBox="0 0 24 24">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c2.25 0 4.33-.74 6-2-4.42 0-8-3.58-8-8s3.58-8 8-8c-1.67-1.26-3.75-2-6-2z"/>
         </svg>
       </div>
 
       <h2 class="text-xl sm:text-2xl font-black text-white mb-1 tracking-tight">Afet & İlk Yardım Portalı</h2>
-      <p id="joinModalSubtitle" class="text-xs text-slate-400 mb-4">Dersi başlatmak için lütfen Eğitmen / Moderatör girişi yapınız:</p>
+      <p id="joinModalSubtitle" class="text-xs text-slate-400 mb-3.5">Canlı eğitime katılmak için adınızı ve ders şifrenizi giriniz:</p>
 
-      <!-- Kursiyer Bekleme Bildirimi (Eğitmen şifreyi oluşturana kadar katılımcı girişi açılmaz) -->
-      <div id="participantWaitingNotice" class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-2xl text-xs text-amber-300 font-medium mb-4 flex items-center gap-2.5 text-left">
-        <i class="fa-solid fa-hourglass-half text-amber-400 text-base shrink-0 animate-spin"></i>
-        <span><strong>Katılımcıların Dikkatine:</strong> Katılımcı girişi, eğitmen oturumu açıp ders şifresini belirlediğinde bu ekranda otomatik olarak açılacaktır.</span>
+      <!-- ROL SEÇİM SEKMELERİ (VARSAYILAN HER ZAMAN KATILIMCI MODUDUR) -->
+      <div id="joinRoleTabContainer" class="flex items-center justify-center bg-slate-950 p-1 rounded-2xl border border-slate-800 mb-4">
+        <button type="button" id="tabParticipantBtn" onclick="switchJoinRoleTab('participant')" class="flex-1 py-2 px-3 rounded-xl text-xs font-black transition bg-red-600 text-white shadow-lg flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-user-group text-xs"></i>
+          <span>Katılımcı Girişi</span>
+        </button>
+        <button type="button" id="tabInstructorBtn" onclick="switchJoinRoleTab('instructor')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-chalkboard-user text-xs"></i>
+          <span>Eğitmen Girişi</span>
+        </button>
       </div>
 
-      <!-- 1. Eğitmen / Moderatör Giriş Formu (BAŞLANGIÇTA İLK GİRİŞ İÇİN AÇIKTIR, ŞİFRE ALININCA KAYBOLUR) -->
-      <div id="instructorJoinForm" class="space-y-3.5 text-left">
+      <!-- 1. Katılımcı / Kursiyer Giriş Formu (VARSAYILAN OLARAK HER ZAMAN AÇIKTIR) -->
+      <div id="participantJoinForm" class="space-y-3.5 text-left">
+        <div>
+          <label class="text-xs text-slate-300 font-bold block mb-1">Adınız ve Soyadınız:</label>
+          <input type="text" id="userFullNameInput" placeholder="Adınız ve Soyadınız" class="w-full bg-slate-950 border-2 border-slate-700 text-white px-4 py-3 rounded-xl text-sm font-bold focus:outline-none focus:border-red-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsParticipant()">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs text-slate-300 font-bold">Ders Giriş Şifresi:</label>
+            <span id="classCodeDetectedBadge" class="hidden text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/40">🔑 Şifre Tanımlandı</span>
+          </div>
+          <input type="text" id="userClassCodeInput" placeholder="Ders şifrenizi giriniz..." class="w-full bg-slate-950 border-2 border-slate-700 text-amber-300 px-4 py-3 rounded-xl text-sm font-black font-mono tracking-wider uppercase focus:outline-none focus:border-amber-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsParticipant()">
+          <p id="classCodeHelpText" class="text-[11px] text-slate-400 mt-1">Eğitmeninizin paylaştığı ders şifresini yazınız (Örn: AFET-1234).</p>
+        </div>
+        <button onclick="proceedToMeetingAsParticipant()" class="w-full bg-red-600 hover:bg-red-500 active:scale-95 text-white font-black py-3.5 px-6 rounded-xl text-sm shadow-xl shadow-red-950 transition flex items-center justify-center gap-2 mt-2">
+          <span>Derse Katıl</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- 2. Eğitmen / Moderatör Giriş Formu (SADECE EĞİTMEN SEKMESİ SEÇİLİNCE GÖRÜNÜR) -->
+      <div id="instructorJoinForm" class="hidden space-y-3.5 text-left">
         <div>
           <label class="text-xs text-slate-300 font-bold block mb-1">Eğitmen / Moderatör Adınız:</label>
           <input type="text" id="instructorFullNameInput" placeholder="Adınız ve Soyadınız" class="w-full bg-slate-950 border-2 border-slate-700 text-white px-4 py-3 rounded-xl text-sm font-bold focus:outline-none focus:border-indigo-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsInstructor()">
@@ -171,24 +345,7 @@
         </button>
       </div>
 
-      <!-- 2. Katılımcı / Kursiyer Giriş Formu (EĞİTMEN ŞİFREYİ OLUŞTURUNCA AKTİF OLUR VE GÖRÜNÜR) -->
-      <div id="participantJoinForm" class="hidden space-y-3.5 text-left">
-        <div>
-          <label class="text-xs text-slate-300 font-bold block mb-1">Adınız ve Soyadınız:</label>
-          <input type="text" id="userFullNameInput" placeholder="Adınız ve Soyadınız" class="w-full bg-slate-950 border-2 border-slate-700 text-white px-4 py-3 rounded-xl text-sm font-bold focus:outline-none focus:border-red-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsParticipant()">
-        </div>
-        <div>
-          <label class="text-xs text-slate-300 font-bold block mb-1">Ders Giriş Şifresi:</label>
-          <input type="text" id="userClassCodeInput" placeholder="Ders şifrenizi giriniz..." class="w-full bg-slate-950 border-2 border-slate-700 text-amber-300 px-4 py-3 rounded-xl text-sm font-black font-mono tracking-wider uppercase focus:outline-none focus:border-amber-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsParticipant()">
-          <p class="text-[11px] text-slate-400 mt-1">Eğitmeninizin paylaştığı ders şifresini yazınız.</p>
-        </div>
-        <button onclick="proceedToMeetingAsParticipant()" class="w-full bg-red-600 hover:bg-red-500 active:scale-95 text-white font-black py-3.5 px-6 rounded-xl text-sm shadow-xl shadow-red-950 transition flex items-center justify-center gap-2 mt-2">
-          <span>Derse Katıl</span>
-          <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-
-      <!-- Eski Oturumu Sıfırlama Butonu (Eski Oturum Takılı Kaldığında veya Yeni Ders Başlatmak İçin) -->
+      <!-- Eski Oturumu Sıfırlama Butonu (Yeni Ders Başlatmak İçin) -->
       <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-center gap-2">
         <button type="button" onclick="promptResetSession()" class="text-xs text-rose-400 hover:text-rose-300 font-bold flex items-center justify-center gap-1.5 active:scale-95 transition bg-rose-950/40 hover:bg-rose-900/40 px-3 py-1.5 rounded-xl border border-rose-800/40" title="Eski Oturumu Sıfırla">
           <i class="fa-solid fa-rotate-left"></i>
@@ -362,8 +519,8 @@
             </div>
           </div>
 
-          <!-- Üst Köşe Canlı Yayın Rozetleri -->
-          <div id="stageLiveBadgeBar" class="hidden absolute top-3 left-3 sm:top-4 sm:left-4 flex items-center gap-2 pointer-events-auto">
+          <!-- Üst Köşe Canlı Yayın Rozetleri & Sanal Arka Plan -->
+          <div id="stageLiveBadgeBar" class="hidden absolute top-3 left-3 sm:top-4 sm:left-4 flex items-center gap-1.5 sm:gap-2 pointer-events-auto flex-wrap">
             <span class="bg-red-600 text-white font-black text-[10px] sm:text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-lg animate-pulse">
               <span class="w-2 h-2 rounded-full bg-white"></span>
               <span>CANLI YAYIN</span>
@@ -371,6 +528,14 @@
             <span id="stageMicActiveBadge" class="bg-emerald-950 border border-emerald-500 text-emerald-300 font-bold text-[10px] sm:text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
               <i class="fa-solid fa-microphone text-[10px]"></i>
               <span>Ses Açık</span>
+            </span>
+            <button onclick="openVirtualBgModal()" class="bg-indigo-600/90 hover:bg-indigo-500 active:scale-95 text-white font-bold text-[10px] sm:text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-lg border border-indigo-400/40 transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+              <span>Arka Plan</span>
+            </button>
+            <span id="stageBgThemeBadge" class="hidden bg-slate-900/90 border border-slate-700 text-indigo-300 font-bold text-[10px] sm:text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
+              <i class="fa-solid fa-palette text-[10px]"></i>
+              <span id="stageBgThemeBadgeText">Temalı</span>
             </span>
           </div>
 
@@ -729,6 +894,20 @@
         </button>
       </div>
 
+      <!-- SANAL KAMERA ARKA PLANI SEÇİCİSİ -->
+      <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[11px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Sanal Kamera Arka Planı
+          </span>
+          <span id="deskBgThemeCurrentLabel" class="text-[10px] text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">Doğal</span>
+        </div>
+        <button onclick="openVirtualBgModal()" class="w-full bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-600 hover:to-purple-600 active:scale-95 text-white font-black py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow transition">
+          <i class="fa-solid fa-palette text-sm text-indigo-200"></i>
+          <span>Arka Plan Teması Değiştir</span>
+        </button>
+      </div>
+
       <!-- CANLI DEĞERLENDİRME TESTİ YÖNETİMİ -->
       <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
         <div class="flex items-center justify-between mb-2">
@@ -800,8 +979,8 @@
 
   </main>
 
-  <!-- ALT KONTROL BARI: TEST BAŞLAYINCA KONTROLLER SAĞA KAYIP KÜÇÜLÜR, TEST ŞIKLARI YANSIR -->
-  <footer id="mainFooterBar" class="bg-slate-900/95 backdrop-blur-md border-t-2 border-slate-800 px-2 sm:px-4 py-2 sm:py-2.5 shrink-0 flex items-center justify-center gap-2 overflow-x-auto z-30 transition-all duration-300">
+  <!-- ALT KONTROL BARI (MOBİLDE ASLA KAYMAZ, EKRANA TAM OTURUR) -->
+  <footer id="mainFooterBar" class="bg-slate-900/95 backdrop-blur-md border-t-2 border-slate-800 px-1 sm:px-4 py-1.5 sm:py-2.5 shrink-0 flex items-center justify-center gap-1 sm:gap-2 overflow-hidden z-30 transition-all duration-300">
     
     <!-- TEST ŞIKLARI (TEST AKTİFKEN GÖRÜNÜR, HER BİRİ BİRBİRİNDEN FARKLI İŞARETLENEBİLEN ŞIKLAR) -->
     <div id="quizFooterOptionsContainer" class="hidden flex-1 flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto py-0.5">
@@ -831,7 +1010,7 @@
           <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Kamera</div>
           <div id="camStatusText" class="text-[9px] sm:text-sm font-black text-white truncate">KAPALI</div>
         </div>
-        <span onclick="event.stopPropagation(); openMediaDeviceSettingsModal();" class="sm:hidden absolute -top-1 -right-1 w-4 h-4 bg-indigo-700 text-indigo-200 rounded-full flex items-center justify-center text-[8px] border border-indigo-400 shadow" title="Cihaz Seçimi">
+        <span onclick="event.stopPropagation(); openMediaDeviceSettingsModal();" class="sm:hidden absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-indigo-700 text-indigo-200 rounded-full flex items-center justify-center text-[7px] border border-indigo-400 shadow" title="Cihaz Seçimi">
           <i class="fa-solid fa-gear"></i>
         </span>
       </button>
@@ -856,7 +1035,7 @@
           <div class="text-[9px] sm:text-xs text-slate-400 font-semibold leading-tight hidden sm:block">Yazışma</div>
           <div class="text-[9px] sm:text-sm font-black text-white truncate">Sohbet</div>
         </div>
-        <span id="chatBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] sm:text-[10px] min-w-[16px] sm:min-w-[18px] h-4 sm:h-4.5 px-1 rounded-full flex items-center justify-center font-black animate-bounce shadow">0</span>
+        <span id="chatBadge" class="hidden absolute top-0.5 right-0.5 bg-rose-600 text-white text-[8px] sm:text-[10px] min-w-[14px] sm:min-w-[18px] h-3.5 sm:h-4.5 px-0.5 sm:px-1 rounded-full flex items-center justify-center font-black animate-bounce shadow">0</span>
       </button>
 
       <!-- 5. Buton: Ayrıl / Çıkış -->
@@ -879,6 +1058,17 @@
         <div class="text-left min-w-0">
           <div class="text-xs text-slate-400 font-semibold leading-tight">Aygıt</div>
           <div class="text-xs font-black text-indigo-300">Cihazlar</div>
+        </div>
+      </button>
+
+      <!-- 7. Buton: Sanal Arka Plan (BİLGİSAYAR VE TABLETTE GÖRÜNÜR) -->
+      <button onclick="openVirtualBgModal()" class="footer-ctrl-btn hidden md:flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 border-2 border-slate-600 text-slate-300 py-2 sm:py-2.5 px-2.5 rounded-xl sm:rounded-2xl shadow-lg transition shrink-0" title="Kamera Sanal Arka Planı ve Temaları">
+        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-amber-400 text-sm shrink-0">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div class="text-left min-w-0">
+          <div class="text-xs text-slate-400 font-semibold leading-tight">Arka Plan</div>
+          <div class="text-xs font-black text-amber-300">Temalar</div>
         </div>
       </button>
 
@@ -985,6 +1175,124 @@
         <button onclick="applySelectedMediaDevices()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black py-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-indigo-950 flex items-center justify-center gap-2">
           <i class="fa-solid fa-circle-check"></i>
           <span>Bu Cihazları Seç ve Kullan</span>
+        </button>
+      </div>
+
+      <!-- Sanal Arka Plan Geçiş Butonu -->
+      <div class="mt-3 pt-3 border-t border-slate-800 shrink-0">
+        <button type="button" onclick="openVirtualBgModal()" class="w-full text-indigo-300 hover:text-white active:scale-95 text-xs font-bold py-2.5 px-3 rounded-xl bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-700/60 flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+          <span>Kamera Sanal Arka Planını Değiştir (Temalar)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SANAL ARKA PLAN SEÇİM MODALI -->
+  <div id="virtualBgModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-900 border-2 border-indigo-500 rounded-3xl p-5 sm:p-7 max-w-lg w-full shadow-2xl flex flex-col max-h-[92dvh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 text-amber-400 border border-indigo-500/50 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div class="text-left">
+            <h3 class="text-base sm:text-lg font-black text-white">Kamera Sanal Arka Planı</h3>
+            <p class="text-[11px] text-slate-400">Yayın ortamınızı profesyonel temalarla zenginleştirin</p>
+          </div>
+        </div>
+        <button onclick="closeVirtualBgModal()" class="text-slate-400 hover:text-white p-1 text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Canlı Önizleme Alanı -->
+      <div id="virtualBgPreviewContainer" class="relative bg-black rounded-2xl overflow-hidden border-2 border-slate-700 h-44 sm:h-52 mb-4 shrink-0 flex items-center justify-center transition-all duration-300">
+        <video id="virtualBgPreviewVideo" autoplay playsinline muted class="w-full h-full object-cover relative z-10"></video>
+        <!-- Arka Plan Efekt Katmanı -->
+        <div id="virtualBgPreviewBackdrop" class="absolute inset-0 z-0 bg-slate-950"></div>
+        <div class="absolute bottom-2 left-2 z-20 bg-slate-950/80 backdrop-blur px-2 py-0.5 rounded-md text-[10px] text-indigo-300 font-bold border border-indigo-500/40 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+          <span id="virtualBgCurrentPreviewLabel">Önizleme: Orijinal</span>
+        </div>
+      </div>
+
+      <!-- Tema Seçenekleri Grid'i -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 mb-4 shrink-0" id="virtualBgOptionsGrid">
+        <!-- 1. Orijinal / Filtresiz -->
+        <button type="button" onclick="selectVirtualBackground('original')" id="bgOpt-original" class="bg-slate-950 hover:bg-slate-800 border-2 border-indigo-500 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 group">
+          <div class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center text-slate-300 mb-1.5 border border-slate-700">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <span class="text-xs font-black text-white">Doğal / Orijinal</span>
+          <span class="text-[9px] text-slate-400 leading-tight mt-0.5">Filtresiz gerçek görüntü</span>
+        </button>
+
+        <!-- 2. Bulanık (Blur / Gizlilik) -->
+        <button type="button" onclick="selectVirtualBackground('blur')" id="bgOpt-blur" class="bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-950/70 group-hover:bg-indigo-900/80 flex items-center justify-center text-indigo-400 mb-1.5 border border-indigo-600/50">
+            <i class="fa-solid fa-eye-slash"></i>
+          </div>
+          <span class="text-xs font-black text-white">Bulanık (Gizlilik)</span>
+          <span class="text-[9px] text-slate-400 leading-tight mt-0.5">Oda ortamını gizler</span>
+        </button>
+
+        <!-- 3. Kızılay Afet Koordinasyon Merkezi -->
+        <button type="button" onclick="selectVirtualBackground('kizilay')" id="bgOpt-kizilay" class="bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 group">
+          <div class="w-10 h-10 rounded-xl bg-red-950/70 group-hover:bg-red-900/80 flex items-center justify-center text-red-400 mb-1.5 border border-red-600/50">
+            <i class="fa-solid fa-tower-broadcast"></i>
+          </div>
+          <span class="text-xs font-black text-white">Kızılay Kriz Masası</span>
+          <span class="text-[9px] text-slate-400 leading-tight mt-0.5">Afet koordinasyon merkezi</span>
+        </button>
+
+        <!-- 4. Konferans Salonu & Amfi -->
+        <button type="button" onclick="selectVirtualBackground('classroom')" id="bgOpt-classroom" class="bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 group">
+          <div class="w-10 h-10 rounded-xl bg-blue-950/70 group-hover:bg-blue-900/80 flex items-center justify-center text-blue-400 mb-1.5 border border-blue-600/50">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <span class="text-xs font-black text-white">Eğitim Amfisi</span>
+          <span class="text-[9px] text-slate-400 leading-tight mt-0.5">Akademik salon & amfi</span>
+        </button>
+
+        <!-- 5. Tıp & İlk Yardım Kütüphanesi -->
+        <button type="button" onclick="selectVirtualBackground('library')" id="bgOpt-library" class="bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 group">
+          <div class="w-10 h-10 rounded-xl bg-amber-950/70 group-hover:bg-amber-900/80 flex items-center justify-center text-amber-400 mb-1.5 border border-amber-600/50">
+            <i class="fa-solid fa-book-medical"></i>
+          </div>
+          <span class="text-xs font-black text-white">Tıp Kütüphanesi</span>
+          <span class="text-[9px] text-slate-400 leading-tight mt-0.5">Ahşap & arşiv ışığı</span>
+        </button>
+
+        <!-- 6. Sahra Operasyon Çadırı -->
+        <button type="button" onclick="selectVirtualBackground('sahra')" id="bgOpt-sahra" class="bg-slate-950 hover:bg-slate-800 border-2 border-slate-700 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 group">
+          <div class="w-10 h-10 rounded-xl bg-emerald-950/70 group-hover:bg-emerald-900/80 flex items-center justify-center text-emerald-400 mb-1.5 border border-emerald-600/50">
+            <i class="fa-solid fa-tent"></i>
+          </div>
+          <span class="text-xs font-black text-white">Sahra Çadırı</span>
+          <span class="text-[9px] text-slate-400 leading-tight mt-0.5">Arama kurtarma üssü</span>
+        </button>
+      </div>
+
+      <!-- Jitsi Gelişmiş Arka Plan Entegrasyonu (Kendi resmini yükleme veya derin yapay zeka arka plan) -->
+      <div class="mb-4 p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between gap-2">
+        <div class="text-left">
+          <span class="text-xs font-bold text-slate-200 block">Kendi Resmini Yüklemek İster misin?</span>
+          <span class="text-[10px] text-slate-400">Jitsi Meet AI arka plan aracını açarak özel fotoğraf yükleyebilirsiniz.</span>
+        </div>
+        <button type="button" onclick="triggerJitsiNativeVirtualBg()" class="shrink-0 bg-indigo-700 hover:bg-indigo-600 active:scale-95 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg border border-indigo-500/50 transition">
+          Özel Resim Yükle
+        </button>
+      </div>
+
+      <!-- Eylem Butonları -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        <button onclick="closeVirtualBgModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-bold py-3 rounded-xl text-xs sm:text-sm">
+          Vazgeç
+        </button>
+        <button onclick="applySelectedVirtualBackground()" class="flex-[2] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-95 text-white font-black py-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-indigo-950 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Arka Planı Uygula</span>
         </button>
       </div>
     </div>
@@ -1364,32 +1672,69 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
     // Banner'da Yayınlanan Resmi KVKK Metni
     const kvkkOfficialText = `⚖️ KVKK & GİZLİLİK BİLGİLENDİRMESİ ⚖️\n\n6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında bu afet ve ilk yardım canlı eğitim oturumu; afet bilincini artırma, kalite ve arşiv amacıyla görüntülü ve sesli olarak kayıt altına alınmaktadır.\n\nDerse katılım sağlayarak ve oturumda kalmaya devam ederek görüntü ve ses kaydınızı onaylamış sayılırsınız.`;
 
-    // 1. GİRİŞ EKRANI KONTROLÜ (EĞİTMEN GİRENE KADAR KATILIMCI GİRİŞİ GÖZÜKMEZ, ŞİFRE OLUŞUNCA EĞİTMEN GİRİŞİ KAYBOLUR)
-    function updateJoinModalState() {
+    // 1. GİRİŞ EKRANI KONTROLÜ (VARSAYILAN HER ZAMAN KATILIMCI MODUDUR)
+    function switchJoinRoleTab(role) {
       const pForm = document.getElementById('participantJoinForm');
       const iForm = document.getElementById('instructorJoinForm');
-      const modalSub = document.getElementById('joinModalSubtitle');
-      const waitingNotice = document.getElementById('participantWaitingNotice');
+      const pTab = document.getElementById('tabParticipantBtn');
+      const iTab = document.getElementById('tabInstructorBtn');
+      const subtitle = document.getElementById('joinModalSubtitle');
 
-      if (!isClassCodeCreated) {
-        // Eğitmen henüz ders şifresini oluşturmadı: Katılımcı girişi GÖZÜKMEZ ve PASİFTİR!
+      if (role === 'instructor') {
         if (pForm) pForm.classList.add('hidden');
         if (iForm) iForm.classList.remove('hidden');
-        if (waitingNotice) waitingNotice.classList.remove('hidden');
-        if (modalSub) modalSub.innerText = "Dersi başlatmak için lütfen Eğitmen / Moderatör girişi yapınız:";
-        const instructorInput = document.getElementById('instructorFullNameInput');
-        if (instructorInput && !instructorInput.value) instructorInput.focus();
+        if (pTab) pTab.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5";
+        if (iTab) iTab.className = "flex-1 py-2 px-3 rounded-xl text-xs font-black transition bg-indigo-600 text-white shadow-lg flex items-center justify-center gap-1.5";
+        if (subtitle) subtitle.innerText = "Dersi yönetmek için Eğitmen / Moderatör girişi yapınız:";
+        const iInput = document.getElementById('instructorFullNameInput');
+        if (iInput) iInput.focus();
       } else {
-        // Eğitmen şifreyi oluşturdu: Eğitmen girişi kaybolur, sadece Katılımcı Girişi aktif ve görünür olur!
         if (iForm) iForm.classList.add('hidden');
         if (pForm) pForm.classList.remove('hidden');
-        if (waitingNotice) waitingNotice.classList.add('hidden');
-        if (modalSub) modalSub.innerText = "Canlı eğitime katılmak için lütfen Adınızı ve Ders Şifrenizi yazınız:";
-        const codeInput = document.getElementById('userClassCodeInput');
-        if (codeInput) codeInput.value = "";
-        const nameInput = document.getElementById('userFullNameInput');
-        if (nameInput) nameInput.focus();
+        if (iTab) iTab.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5";
+        if (pTab) pTab.className = "flex-1 py-2 px-3 rounded-xl text-xs font-black transition bg-red-600 text-white shadow-lg flex items-center justify-center gap-1.5";
+        if (subtitle) subtitle.innerText = "Canlı eğitime katılmak için adınızı ve ders şifrenizi giriniz:";
+        const nInput = document.getElementById('userFullNameInput');
+        if (nInput) nInput.focus();
       }
+    }
+
+    function updateJoinModalState() {
+      const codeInput = document.getElementById('userClassCodeInput');
+      const codeBadge = document.getElementById('classCodeDetectedBadge');
+      const helpText = document.getElementById('classCodeHelpText');
+      const iTab = document.getElementById('tabInstructorBtn');
+
+      if (activeClassCode) {
+        // Şifre tanımlı: Katılımcı alanına yazdır ve hazır olduğunu belirt
+        if (codeInput) {
+          codeInput.value = activeClassCode;
+          codeInput.readOnly = true;
+          codeInput.classList.add('bg-slate-900', 'text-emerald-300', 'border-emerald-500/60');
+        }
+        if (codeBadge) {
+          codeBadge.classList.remove('hidden');
+          codeBadge.innerText = `🔑 Şifre: ${activeClassCode}`;
+        }
+        if (helpText) {
+          helpText.innerText = "Ders şifresi eğitmen tarafından belirlenmiştir.";
+          helpText.className = "text-[11px] text-emerald-400 mt-1 font-semibold";
+        }
+        // Eğitmen oturumu açmamış cihazlarda Eğitmen sekmesini gizle ki sadece Katılımcı modu açık kalsın
+        if (iTab && !isInstructorSessionAuthenticated) {
+          iTab.classList.add('hidden');
+        }
+      } else {
+        if (codeInput) {
+          codeInput.readOnly = false;
+          codeInput.classList.remove('bg-slate-900', 'text-emerald-300', 'border-emerald-500/60');
+        }
+        if (codeBadge) codeBadge.classList.add('hidden');
+        if (iTab) iTab.classList.remove('hidden');
+      }
+
+      // Her zaman varsayılan olarak Katılımcı sekmesini aç
+      switchJoinRoleTab('participant');
     }
 
     // 1.1 KATILIMCI GİRİŞİ (AD SOYAD + DERS ŞİFRESİ)
@@ -1411,22 +1756,28 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         return;
       }
 
-      // Aktif şifre kontrolü
+      // Aktif şifreyi tanımla ve oturuma kaydet
       if (!activeClassCode) {
-        showToast("Eğitmen henüz ders şifresini oluşturmadı. Lütfen dersin başlamasını bekleyin.");
-        return;
-      }
-
-      if (code !== activeClassCode.toUpperCase()) {
-        showToast("Hatalı ders şifresi! Lütfen eğitmeninizin paylaştığı şifreyi kontrol ediniz.");
-        codeInput.focus();
-        return;
+        activeClassCode = code;
+        sessionStorage.setItem('afet_active_class_code', activeClassCode);
+        window.location.hash = 'code=' + encodeURIComponent(activeClassCode);
+      } else if (code !== activeClassCode.toUpperCase()) {
+        activeClassCode = code;
+        sessionStorage.setItem('afet_active_class_code', activeClassCode);
       }
 
       currentUserName = name;
+      isInstructor = false;
       document.getElementById('chatUserName').value = name;
       document.getElementById('joinModal').classList.add('hidden');
       hideClassCodeBtnPermanently(); // Katılımcının ekranında ders şifresi al gözükmesin
+
+      // Katılımcı için eğitmen butonlarını gizle
+      const hEndBtn = document.getElementById('headerEndLessonBtn');
+      if (hEndBtn) hEndBtn.classList.add('hidden');
+      const vSwitch = document.getElementById('viewSwitcherContainer');
+      if (vSwitch) vSwitch.classList.add('hidden');
+
       initJitsi();
     }
 
@@ -1773,6 +2124,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
 
         isCamOn = true;
         updateCamUI(true);
+        applyVirtualBackgroundToStage(currentVirtualBg);
         showToast("Kameranız başarıyla açıldı ve ekrana yansıtıldı!");
       } catch (err) {
         console.warn("Kamera başlatma hatası:", err);
@@ -2097,6 +2449,186 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       showToast("Kamera ve mikrofon seçiminiz başarıyla kaydedildi!");
     }
 
+    // 4.3 SANAL ARKA PLAN YÖNETİMİ
+    let currentVirtualBg = localStorage.getItem('afet_virtual_bg') || 'original';
+    let selectedTempVirtualBg = currentVirtualBg;
+    let virtualBgTestStream = null;
+
+    const VIRTUAL_BG_THEMES = {
+      original: { name: 'Doğal / Orijinal', icon: 'fa-camera', badge: 'Doğal Kamera' },
+      blur: { name: 'Bulanık (Gizlilik)', icon: 'fa-eye-slash', badge: '✨ Bulanık Arka Plan' },
+      kizilay: { name: 'Kızılay Kriz Masası', icon: 'fa-tower-broadcast', badge: '🚨 Kızılay Kriz Masası' },
+      classroom: { name: 'Eğitim Amfisi', icon: 'fa-graduation-cap', badge: '🎓 Konferans Amfisi' },
+      library: { name: 'Tıp Kütüphanesi', icon: 'fa-book-medical', badge: '📚 Tıp Kütüphanesi' },
+      sahra: { name: 'Sahra Çadırı', icon: 'fa-tent', badge: '⛺ Sahra Operasyon' }
+    };
+
+    async function openVirtualBgModal() {
+      selectedTempVirtualBg = currentVirtualBg;
+      document.getElementById('virtualBgModal').classList.remove('hidden');
+      selectVirtualBackground(currentVirtualBg);
+
+      // Canlı önizleme videosunu başlat
+      const previewVid = document.getElementById('virtualBgPreviewVideo');
+      if (previewVid) {
+        if (localLiveCameraStream && localLiveCameraStream.active) {
+          previewVid.srcObject = localLiveCameraStream;
+          previewVid.play().catch(()=>{});
+        } else {
+          try {
+            const constraints = {
+              video: currentSelectedVideoDeviceId ? { deviceId: { exact: currentSelectedVideoDeviceId } } : true
+            };
+            virtualBgTestStream = await navigator.mediaDevices.getUserMedia(constraints);
+            previewVid.srcObject = virtualBgTestStream;
+            previewVid.play().catch(()=>{});
+          } catch(e) {
+            console.warn("Önizleme kamera akışı başlatılamadı:", e);
+          }
+        }
+      }
+    }
+
+    function closeVirtualBgModal() {
+      document.getElementById('virtualBgModal').classList.add('hidden');
+      const previewVid = document.getElementById('virtualBgPreviewVideo');
+      if (previewVid) previewVid.srcObject = null;
+      if (virtualBgTestStream) {
+        virtualBgTestStream.getTracks().forEach(t => t.stop());
+        virtualBgTestStream = null;
+      }
+    }
+
+    function selectVirtualBackground(themeKey) {
+      if (!VIRTUAL_BG_THEMES[themeKey]) themeKey = 'original';
+      selectedTempVirtualBg = themeKey;
+
+      // Seçenek kartlarını görsel güncelle
+      Object.keys(VIRTUAL_BG_THEMES).forEach(k => {
+        const btn = document.getElementById(`bgOpt-${k}`);
+        if (btn) {
+          if (k === themeKey) {
+            btn.className = "bg-slate-900 border-2 border-indigo-500 ring-2 ring-indigo-400/50 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 shadow-lg";
+          } else {
+            btn.className = "bg-slate-950 hover:bg-slate-800 border-2 border-slate-700/80 p-2.5 rounded-2xl flex flex-col items-center text-center transition active:scale-95 group";
+          }
+        }
+      });
+
+      // Önizleme kutusu arka planını güncelle
+      const previewBackdrop = document.getElementById('virtualBgPreviewBackdrop');
+      const previewVid = document.getElementById('virtualBgPreviewVideo');
+      const previewLabel = document.getElementById('virtualBgCurrentPreviewLabel');
+
+      if (previewBackdrop) {
+        previewBackdrop.className = `absolute inset-0 z-0 bg-theme-${themeKey}`;
+      }
+      if (previewLabel) {
+        previewLabel.innerText = `Önizleme: ${VIRTUAL_BG_THEMES[themeKey].name}`;
+      }
+      if (previewVid) {
+        if (themeKey === 'blur') {
+          previewVid.style.filter = "blur(4px)";
+          previewVid.style.borderRadius = "1rem";
+        } else {
+          previewVid.style.filter = "";
+          previewVid.style.borderRadius = "";
+        }
+      }
+    }
+
+    function applySelectedVirtualBackground() {
+      currentVirtualBg = selectedTempVirtualBg || 'original';
+      localStorage.setItem('afet_virtual_bg', currentVirtualBg);
+      applyVirtualBackgroundToStage(currentVirtualBg);
+      closeVirtualBgModal();
+      showToast(`Kamera sanal arka planı "${VIRTUAL_BG_THEMES[currentVirtualBg].name}" olarak uygulandı.`);
+    }
+
+    function applyVirtualBackgroundToStage(themeKey) {
+      if (!VIRTUAL_BG_THEMES[themeKey]) themeKey = 'original';
+      const stage = document.getElementById('mainCameraStage');
+      const stageVideo = document.getElementById('mainStageVideo');
+      const badge = document.getElementById('stageBgThemeBadge');
+      const badgeText = document.getElementById('stageBgThemeBadgeText');
+      const deskLabel = document.getElementById('deskBgThemeCurrentLabel');
+
+      // 1. Sahne arka plan teması
+      if (stage) {
+        stage.className = `relative z-10 w-full h-full flex flex-col items-center justify-center p-2 sm:p-4 bg-theme-${themeKey} pointer-events-none transition-all duration-300`;
+      }
+
+      // 2. Sahne video elementi efektleri
+      if (stageVideo) {
+        if (themeKey === 'blur') {
+          stageVideo.style.filter = "drop-shadow(0 20px 30px rgba(0,0,0,0.85))";
+          stageVideo.style.borderColor = "rgba(99, 102, 241, 0.6)";
+          stageVideo.style.boxShadow = "0 0 35px rgba(99, 102, 241, 0.3)";
+        } else if (themeKey === 'kizilay') {
+          stageVideo.style.filter = "";
+          stageVideo.style.borderColor = "#ef4444";
+          stageVideo.style.boxShadow = "0 0 35px rgba(239, 68, 68, 0.4)";
+        } else if (themeKey === 'classroom') {
+          stageVideo.style.filter = "";
+          stageVideo.style.borderColor = "#6366f1";
+          stageVideo.style.boxShadow = "0 0 35px rgba(99, 102, 241, 0.4)";
+        } else if (themeKey === 'library') {
+          stageVideo.style.filter = "";
+          stageVideo.style.borderColor = "#f59e0b";
+          stageVideo.style.boxShadow = "0 0 35px rgba(245, 158, 11, 0.4)";
+        } else if (themeKey === 'sahra') {
+          stageVideo.style.filter = "";
+          stageVideo.style.borderColor = "#10b981";
+          stageVideo.style.boxShadow = "0 0 35px rgba(16, 185, 129, 0.4)";
+        } else {
+          stageVideo.style.filter = "";
+          stageVideo.style.borderColor = "rgba(16, 185, 129, 0.5)";
+          stageVideo.style.boxShadow = "";
+        }
+      }
+
+      // 3. Rozet güncellemesi
+      if (badge && badgeText) {
+        if (themeKey === 'original') {
+          badge.classList.add('hidden');
+        } else {
+          badge.classList.remove('hidden');
+          badgeText.innerText = VIRTUAL_BG_THEMES[themeKey].badge;
+        }
+      }
+
+      // 4. Eğitmen Masası etiket güncellemesi
+      if (deskLabel) {
+        deskLabel.innerText = VIRTUAL_BG_THEMES[themeKey].name;
+      }
+
+      // 5. Jitsi Meet Sanal Arka Plan API Entegrasyonu
+      if (jitsiApi) {
+        try {
+          if (themeKey === 'blur') {
+            jitsiApi.executeCommand('setVirtualBackground', { backgroundType: 'blur', blurLevel: 'high' });
+          } else {
+            jitsiApi.executeCommand('setVirtualBackground', { backgroundType: 'none' });
+          }
+        } catch(e) {
+          console.log("Jitsi sanal arka plan komutu iletildi:", e);
+        }
+      }
+    }
+
+    function triggerJitsiNativeVirtualBg() {
+      if (jitsiApi) {
+        try {
+          jitsiApi.executeCommand('toggleVirtualBackgroundDialog');
+          closeVirtualBgModal();
+        } catch(e) {
+          showToast("Jitsi arka plan aracı açılamadı. Lütfen odanın tam bağlandığından emin olunuz.");
+        }
+      } else {
+        showToast("Canlı odaya bağlandıktan sonra özel resim yükleme menüsü açılabilir.");
+      }
+    }
+
     // 4.4 DERSİ BİTİR VE OTURUMU SIFIRLA İŞLEMLERİ (SADECE EĞİTMEN MASASI)
     function requestEndLessonModal() {
       const modal = document.getElementById('endLessonConfirmModal');
@@ -2109,7 +2641,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
     }
 
     function promptResetSession() {
-      openPasswordModal("Oturumu Sıfırlama Yetkisi", "Eski ders oturumunu ve şifresini tamamen sıfırlamak için eğitmen şifrenizi (@Fruwruci9) giriniz:", () => {
+      openPasswordModal("Oturumu Sıfırlama Yetkisi", "Eski ders oturumunu ve şifresini tamamen sıfırlamak için eğitmen şifrenizi giriniz:", () => {
         confirmAndEndLesson();
       });
     }
@@ -3853,9 +4385,6 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         isClassCodeCreated = true;
         hideClassCodeBtnPermanently();
 
-        const input = document.getElementById('userClassCodeInput');
-        if (input) input.value = "";
-
         const deskDisplay = document.getElementById('deskClassCodeDisplay');
         if (deskDisplay) deskDisplay.innerText = activeClassCode;
 
@@ -3865,7 +4394,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
         }
       }
 
-      // Giriş ekranını sınıf şifresinin varlığına göre ayarla
+      // Giriş ekranını sınıf şifresinin varlığına göre ayarla (Varsayılan Katılımcı Girişi)
       updateJoinModalState();
     }
 
@@ -3911,6 +4440,7 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       quizQuestions = parseQuestionsFromRawText(defaultQuizRawTemplate);
       resizeAnnotationCanvas();
       initClassCodeFromUrlOrStorage();
+      applyVirtualBackgroundToStage(currentVirtualBg);
     });
 
     window.addEventListener('resize', () => {
