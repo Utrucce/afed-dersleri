@@ -162,8 +162,8 @@
         </div>
         <div>
           <label class="text-xs text-slate-300 font-bold block mb-1">Moderatör Şifresi:</label>
-          <input type="password" id="instructorJoinPassInput" placeholder="Şifreniz: @Fruwruci9" class="w-full bg-slate-950 border-2 border-slate-700 text-white px-4 py-3 rounded-xl text-sm font-bold tracking-wider focus:outline-none focus:border-indigo-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsInstructor()">
-          <p class="text-[11px] text-indigo-400 mt-1">Eğitmen şifreniz: <strong>@Fruwruci9</strong> (Giriş yapınca bir daha şifre istenmez).</p>
+          <input type="password" id="instructorJoinPassInput" placeholder="Şifrenizi giriniz..." class="w-full bg-slate-950 border-2 border-slate-700 text-white px-4 py-3 rounded-xl text-sm font-bold tracking-wider focus:outline-none focus:border-indigo-500 shadow-inner" onkeydown="if(event.key==='Enter') proceedToMeetingAsInstructor()">
+          <p class="text-[11px] text-slate-400 mt-1">Giriş yaptıktan sonra oturum boyunca tekrar şifre sorulmaz.</p>
         </div>
         <button onclick="proceedToMeetingAsInstructor()" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black py-3.5 px-6 rounded-xl text-sm shadow-xl shadow-indigo-950 transition flex items-center justify-center gap-2 mt-2">
           <span>Eğitmen / Moderatör Olarak Başlat</span>
@@ -666,6 +666,10 @@
           <i class="fa-solid fa-scale-balanced text-amber-400 text-base"></i>
           <span id="kvkkBtnLabel" class="truncate max-w-full text-center text-[11px] sm:text-xs">KVKK Uyarısı Aç</span>
         </button>
+        <button onclick="openJitsiDeviceSelection()" class="col-span-2 bg-slate-800 hover:bg-indigo-900/60 active:scale-95 text-indigo-300 font-bold py-2 px-2 rounded-xl text-xs flex items-center justify-center gap-2 border border-indigo-700/50 shadow transition">
+          <i class="fa-solid fa-sliders text-indigo-400"></i>
+          <span>Kamera & Mikrofon Cihazını Değiştir (Telefon / PC)</span>
+        </button>
       </div>
 
       <!-- CANLI DEĞERLENDİRME TESTİ YÖNETİMİ -->
@@ -811,13 +815,22 @@
       <p class="text-xs sm:text-sm text-slate-300 mb-5 sm:mb-6 leading-relaxed" id="deviceModalDesc">
         Cihazınızı açmak üzeresiniz. Canlı yayına iletilmesini onaylıyor musunuz?
       </p>
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 mb-3">
         <button onclick="closeDeviceConfirmModal(false)" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-bold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm">
           Vazgeç
         </button>
         <button onclick="closeDeviceConfirmModal(true)" class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-950">
           İzin Ver & Aç
         </button>
+      </div>
+
+      <!-- Kamera & Mikrofon Donanım Seçimi (Telefon veya Dahili Kamera Seçeneği) -->
+      <div class="pt-2.5 border-t border-slate-800">
+        <button type="button" onclick="openJitsiDeviceSelection()" class="w-full text-indigo-400 hover:text-indigo-300 active:scale-95 text-xs font-bold py-1.5 px-3 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-700/50 flex items-center justify-center gap-1.5 transition">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Kamera / Mikrofon Değiştir (Cihaz Seç)</span>
+        </button>
+        <p class="text-[10px] text-slate-400 mt-1.5 leading-tight">Windows'ta telefonunuz bağlanmaya çalışıyorsa buradan bilgisayar kamerasını seçebilirsiniz.</p>
       </div>
     </div>
   </div>
@@ -1517,18 +1530,42 @@ Açıklama: Yetişkin CPR protokolünde dakikada 100-120 bası temposunda göğ�
       modal.classList.remove('hidden');
     }
 
-    function closeDeviceConfirmModal(approved) {
+    async function closeDeviceConfirmModal(approved) {
       const modal = document.getElementById('deviceConfirmModal');
       modal.classList.add('hidden');
 
       if (approved && jitsiApi) {
-        if (pendingDeviceToActivate === 'mic') {
+        const target = pendingDeviceToActivate;
+        // Tarayıcı doğrudan izin sorgusunu önden güvenle tetikle
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            const constraints = target === 'mic' ? { audio: true } : { video: true };
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            stream.getTracks().forEach(t => t.stop());
+          } catch (err) {
+            console.warn("Tarayıcı doğrudan medya isteği:", err);
+          }
+        }
+
+        if (target === 'mic') {
           jitsiApi.executeCommand('toggleAudio');
-        } else if (pendingDeviceToActivate === 'cam') {
+        } else if (target === 'cam') {
           jitsiApi.executeCommand('toggleVideo');
         }
       }
       pendingDeviceToActivate = null;
+    }
+
+    function openJitsiDeviceSelection() {
+      if (jitsiApi) {
+        try {
+          jitsiApi.executeCommand('toggleDeviceSelection');
+        } catch (e) {
+          console.warn("Cihaz seçim komutu:", e);
+        }
+      } else {
+        showToast("Canlı yayın motoruna bağlanılıyor, lütfen birkaç saniye bekleyin.");
+      }
     }
 
     function updateMicUI(active) {
